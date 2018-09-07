@@ -1,7 +1,10 @@
 import * as redux from "redux";
-import { LoadingStatus } from "./state";
+import { ReleaseBranchesState } from "./state";
 
-export type Action = FetchReleasesAction | UpdateReleasesAction;
+export type Action =
+  | FetchReleasesAction
+  | UpdateReleasesAction
+  | SelectBranchAction;
 export type Dispatch = redux.Dispatch<Action>;
 
 export interface FetchReleasesAction {
@@ -16,17 +19,26 @@ export function fetchReleasesAction(): FetchReleasesAction {
 
 export interface UpdateReleasesAction {
   type: "UPDATE_RELEASES";
-  status: LoadingStatus;
-  releaseBranchNames: string[];
+  releaseBranches: ReleaseBranchesState;
 }
 
 export function updateReleasesAction(
-  status: LoadingStatus,
-  releaseBranchNames: string[] = []
+  releaseBranches: ReleaseBranchesState
 ): UpdateReleasesAction {
   return {
     type: "UPDATE_RELEASES",
-    status,
-    releaseBranchNames
+    releaseBranches
+  };
+}
+
+export interface SelectBranchAction {
+  type: "SELECT_BRANCH";
+  branchName: string;
+}
+
+export function selectBranchAction(branchName: string): SelectBranchAction {
+  return {
+    type: "SELECT_BRANCH",
+    branchName
   };
 }

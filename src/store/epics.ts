@@ -20,15 +20,20 @@ const fetchReleasesEpic = (
   );
 
 function fetchReleases(): Observable<Action> {
-  return from([updateReleasesAction("loading")]).pipe(
+  return from([updateReleasesAction({ status: "loading" })]).pipe(
     merge(
       from(loadReleaseBranchNames()).pipe(
         mergeMap(branchNames =>
-          from([updateReleasesAction("loaded", branchNames)])
+          from([
+            updateReleasesAction({
+              status: "loaded",
+              names: branchNames
+            })
+          ])
         )
       )
     ),
-    catchError(error => from([updateReleasesAction("failed")]))
+    catchError(error => from([updateReleasesAction({ status: "failed" })]))
   );
 }
 

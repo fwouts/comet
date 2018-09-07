@@ -4,8 +4,7 @@ import { State } from "./state";
 export const rootReducer = (
   state: State = {
     releaseBranches: {
-      status: "loading",
-      names: []
+      status: "loading"
     }
   },
   action: Action
@@ -14,11 +13,19 @@ export const rootReducer = (
     case "UPDATE_RELEASES":
       return {
         ...state,
-        releaseBranches: {
-          status: action.status,
-          names: action.releaseBranchNames
-        }
+        releaseBranches: action.releaseBranches
       };
+    case "SELECT_BRANCH":
+      if (state.releaseBranches && state.releaseBranches.status === "loaded") {
+        return {
+          ...state,
+          releaseBranches: {
+            ...state.releaseBranches,
+            selectedBranchName: action.branchName
+          }
+        };
+      }
+      return state;
     default:
       return state;
   }
