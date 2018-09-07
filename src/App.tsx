@@ -1,22 +1,42 @@
-import * as React from 'react';
-import './App.css';
+import * as React from "react";
+import { connect } from "react-redux";
+import "./App.css";
+import { Dispatch, fetchReleasesAction } from "./store/actions";
+import { ReleaseBranchesState, State } from "./store/state";
 
-import logo from './logo.svg';
+class App extends React.Component<{
+  releaseBranches: ReleaseBranchesState;
+  loadReleases: () => void;
+}> {
+  public componentDidMount() {
+    this.props.loadReleases();
+  }
 
-class App extends React.Component {
   public render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.tsx</code> and save to reload.
-        </p>
+        <p>{this.props.releaseBranches.status}</p>
+        <ul>
+          {this.props.releaseBranches.names.map(name => (
+            <li key={name}>{name}</li>
+          ))}
+        </ul>
       </div>
     );
   }
 }
 
-export default App;
+const mapStateToProps = (state: State) => ({
+  releaseBranches: state.releaseBranches
+});
+
+const mapDispatchToProps = (dispatch: Dispatch) => ({
+  loadReleases: () => dispatch(fetchReleasesAction())
+});
+
+const ConnectedApp = connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(App);
+
+export default ConnectedApp;
