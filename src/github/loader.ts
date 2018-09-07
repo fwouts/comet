@@ -24,7 +24,7 @@ export async function loadReleaseBranchNames(): Promise<string[]> {
 export async function compareBranches(
   baseBranchName: string,
   headBranchName: string
-): Promise<Octokit.CompareCommitsResponse> {
+): Promise<CompareBranchesResult> {
   const comparison = await octokit.repos.compareCommits({
     owner: config.OWNER,
     repo: config.REPO,
@@ -32,4 +32,23 @@ export async function compareBranches(
     head: headBranchName
   });
   return comparison.data;
+}
+
+export interface CompareBranchesResult {
+  ahead_by: number;
+  behind_by: number;
+  total_commits: number;
+  commits: Commit[];
+}
+
+export interface Commit {
+  sha: number;
+  commit: {
+    author: {
+      name: string;
+      email: string;
+    };
+    message: string;
+  };
+  html_url: string;
 }

@@ -1,10 +1,12 @@
 import * as redux from "redux";
-import { ReleaseBranchesState } from "./state";
+import { CommitsState, ReleaseBranchesState } from "./state";
 
 export type Action =
   | FetchReleasesAction
   | UpdateReleasesAction
-  | SelectBranchAction;
+  | SelectBranchAction
+  | FetchComparisonAction
+  | UpdateComparisonAction;
 export type Dispatch = redux.Dispatch<Action>;
 
 export interface FetchReleasesAction {
@@ -40,5 +42,39 @@ export function selectBranchAction(branchName: string): SelectBranchAction {
   return {
     type: "SELECT_BRANCH",
     branchName
+  };
+}
+
+export interface FetchComparisonAction {
+  type: "FETCH_COMPARISON";
+  branchName: string;
+  olderBranchName: string;
+}
+
+export function fetchComparisonAction(
+  branchName: string,
+  olderBranchName: string
+): FetchComparisonAction {
+  return {
+    type: "FETCH_COMPARISON",
+    branchName,
+    olderBranchName
+  };
+}
+
+export interface UpdateComparisonAction {
+  type: "UPDATE_COMPARISON";
+  branchName: string;
+  comparison: CommitsState;
+}
+
+export function updateComparisonAction(
+  branchName: string,
+  comparison: CommitsState
+): UpdateComparisonAction {
+  return {
+    type: "UPDATE_COMPARISON",
+    branchName,
+    comparison
   };
 }

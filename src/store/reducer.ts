@@ -26,6 +26,21 @@ export const rootReducer = (
         };
       }
       return state;
+    case "UPDATE_COMPARISON":
+      if (
+        state.releaseBranches &&
+        state.releaseBranches.status === "loaded" &&
+        state.releaseBranches.selectedBranchName === action.branchName
+      ) {
+        return {
+          ...state,
+          releaseBranches: {
+            ...state.releaseBranches,
+            comparison: action.comparison
+          }
+        };
+      }
+      return state;
     default:
       return state;
   }

@@ -1,3 +1,5 @@
+import { CompareBranchesResult } from "../github/loader";
+
 export interface State {
   releaseBranches: ReleaseBranchesState;
 }
@@ -14,6 +16,18 @@ export interface LoadedReleaseBranchesState {
   status: Loaded;
   names: string[];
   selectedBranchName?: string;
+  comparison?: CommitsState;
+}
+
+export type CommitsState = IncompleteCommitsState | CompleteCommitsState;
+
+export interface IncompleteCommitsState {
+  status: Loading | Failed;
+}
+
+export interface CompleteCommitsState {
+  status: Loaded;
+  result: CompareBranchesResult;
 }
 
 export type LoadingStatus = Loading | Loaded | Failed;
