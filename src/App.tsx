@@ -1,11 +1,11 @@
 import {
   faArrowAltCircleRight,
-  faCodeBranch,
-  faSpinner
+  faCodeBranch
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as React from "react";
 import { connect } from "react-redux";
+import { ClipLoader } from "react-spinners";
 import styled from "styled-components";
 import { CompareBranchesResult } from "./github/loader";
 import {
@@ -95,7 +95,7 @@ const SpinnerContainer = styled.div`
 
 const Spinner = (
   <SpinnerContainer>
-    <FontAwesomeIcon icon={faSpinner} color="#ddd" spin size="6x" />
+    <ClipLoader color="#6da" size={150} />
   </SpinnerContainer>
 );
 
