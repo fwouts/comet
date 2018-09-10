@@ -86,13 +86,16 @@ function fetchComparison(
   branchName: string,
   olderBranchName: string
 ): Observable<Action> {
-  return from([updateComparisonAction(branchName, { status: "loading" })]).pipe(
+  return from([
+    updateComparisonAction(branchName, { status: "loading", olderBranchName })
+  ]).pipe(
     merge(
       from(compareBranches(olderBranchName, branchName)).pipe(
         mergeMap(comparison =>
           from([
             updateComparisonAction(branchName, {
               status: "loaded",
+              olderBranchName,
               result: comparison
             })
           ])
@@ -100,7 +103,12 @@ function fetchComparison(
       )
     ),
     catchError(error =>
-      from([updateComparisonAction(branchName, { status: "failed" })])
+      from([
+        updateComparisonAction(branchName, {
+          status: "failed",
+          olderBranchName
+        })
+      ])
     )
   );
 }

@@ -1,3 +1,8 @@
+import {
+  faArrowAltCircleRight,
+  faCodeBranch
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as React from "react";
 import { connect } from "react-redux";
 import styled from "styled-components";
@@ -18,6 +23,7 @@ const RootContainer = styled.div`
   flex-direction: row;
   justify-content: stretch;
   height: 100vh;
+  background: #fff;
 `;
 
 const ReleasesColumn = styled.ul`
@@ -26,7 +32,7 @@ const ReleasesColumn = styled.ul`
   margin: 0;
   padding: 0;
   flex-shrink: 0;
-  background: #333;
+  border-right: 2px solid #eee;
   overflow-y: scroll;
 `;
 
@@ -40,27 +46,45 @@ const ReleaseItem = styled.li<{
   color: ${props => (props.selected ? "#fff" : "#000")};
 
   &&:hover {
-    background: ${props => (props.selected ? "#111" : "#555")};
+    background: ${props => (props.selected ? "#111" : "#eee")};
   }
 `;
 
-const ComparisonColumn = styled.ul`
+const ComparisonColumn = styled.div`
   flex-grow: 1;
+  overflow-y: scroll;
+`;
+
+const ComparisonTitle = styled.h2`
+  margin: 0;
+  padding: 12px;
+  font-size: 1.2em;
+`;
+
+const ComparisonDescription = styled.p`
+  margin: 12px;
+  margin-top: 0;
+  padding: 8px;
+  background: #fffbf6;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  border: 1px solid #fb6;
+  border-bottom-width: 2px;
+`;
+
+const ComparisonList = styled.ul`
   list-style: none;
   margin: 0;
   padding: 0;
-  background: #111;
-  overflow-y: scroll;
 `;
 
 const CommitItem = styled.li`
   padding: 8px;
-  margin: 8px 0 8px 8px;
-  color: #fff;
-  border: 1px solid #555;
-  border-width: 1px 0 1px 1px;
-  border-radius: 8px 0 0 8px;
-  background: #333;
+  background: #fff;
+
+  &&:nth-child(even) {
+    background: #eee;
+  }
 `;
 
 class App extends React.Component<{
@@ -79,12 +103,33 @@ class App extends React.Component<{
           {this.props.releaseBranches.status === "loaded" &&
             this.renderBranches(this.props.releaseBranches)}
         </ReleasesColumn>
-        <ComparisonColumn>
-          {this.props.releaseBranches.status === "loaded" &&
-            this.props.releaseBranches.comparison &&
-            this.props.releaseBranches.comparison.status === "loaded" &&
-            this.renderComparison(this.props.releaseBranches.comparison.result)}
-        </ComparisonColumn>
+        {this.props.releaseBranches.status === "loaded" &&
+          this.props.releaseBranches.comparison && (
+            <ComparisonColumn>
+              <ComparisonTitle>
+                Comparing {this.props.releaseBranches.selectedBranchName} to{" "}
+                {this.props.releaseBranches.comparison.olderBranchName}
+              </ComparisonTitle>
+              {this.props.releaseBranches.comparison.status === "loaded" && (
+                <>
+                  <ComparisonDescription>
+                    {this.props.releaseBranches.comparison.result.ahead_by}{" "}
+                    commits added.
+                    <br />
+                    {
+                      this.props.releaseBranches.comparison.result.behind_by
+                    }{" "}
+                    commits removed.
+                  </ComparisonDescription>
+                  <ComparisonList>
+                    {this.renderComparison(
+                      this.props.releaseBranches.comparison.result
+                    )}
+                  </ComparisonList>
+                </>
+              )}
+            </ComparisonColumn>
+          )}
       </RootContainer>
     );
   }
@@ -96,14 +141,17 @@ class App extends React.Component<{
         selected={releaseBranches.selectedBranchName === name}
         onClick={() => this.props.selectBranch(name)}
       >
-        {name}
+        <FontAwesomeIcon icon={faCodeBranch} /> {name}
       </ReleaseItem>
     ));
   }
 
   private renderComparison(comparison: CompareBranchesResult) {
     return comparison.commits.map(commit => (
-      <CommitItem key={commit.sha}>{commit.commit.message}</CommitItem>
+      <CommitItem key={commit.sha}>
+        <FontAwesomeIcon icon={faArrowAltCircleRight} color="green" />{" "}
+        {commit.commit.message}
+      </CommitItem>
     ));
   }
 }

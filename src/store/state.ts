@@ -23,10 +23,12 @@ export type CommitsState = IncompleteCommitsState | CompleteCommitsState;
 
 export interface IncompleteCommitsState {
   status: Loading | Failed;
+  olderBranchName: string;
 }
 
 export interface CompleteCommitsState {
   status: Loaded;
+  olderBranchName: string;
   result: CompareBranchesResult;
 }
 
