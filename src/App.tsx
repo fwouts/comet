@@ -1,6 +1,7 @@
 import {
   faArrowAltCircleRight,
-  faCodeBranch
+  faCodeBranch,
+  faSpinner
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as React from "react";
@@ -87,6 +88,17 @@ const CommitItem = styled.li`
   }
 `;
 
+const SpinnerContainer = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+const Spinner = (
+  <SpinnerContainer>
+    <FontAwesomeIcon icon={faSpinner} color="#ddd" spin size="6x" />
+  </SpinnerContainer>
+);
+
 class App extends React.Component<{
   releaseBranches: ReleaseBranchesState;
   loadReleases(): void;
@@ -102,6 +114,7 @@ class App extends React.Component<{
         <ReleasesColumn>
           {this.props.releaseBranches.status === "loaded" &&
             this.renderBranches(this.props.releaseBranches)}
+          {this.props.releaseBranches.status === "loading" && Spinner}
         </ReleasesColumn>
         {this.props.releaseBranches.status === "loaded" &&
           this.props.releaseBranches.comparison && (
@@ -128,6 +141,8 @@ class App extends React.Component<{
                   </ComparisonList>
                 </>
               )}
+              {this.props.releaseBranches.comparison.status === "loading" &&
+                Spinner}
             </ComparisonColumn>
           )}
       </RootContainer>
