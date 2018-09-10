@@ -84,13 +84,14 @@ const CommitItem = styled.li`
   background: #fff;
 
   &&:nth-child(even) {
-    background: #eee;
+    background: #f8f8fc;
   }
 `;
 
 const SpinnerContainer = styled.div`
   display: flex;
   justify-content: center;
+  padding: 32px 16px;
 `;
 
 const Spinner = (
