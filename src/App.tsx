@@ -166,10 +166,14 @@ class App extends React.Component<{
     return comparison.commits.map(commit => (
       <CommitItem key={commit.sha}>
         <FontAwesomeIcon icon={faArrowAltCircleRight} color="green" />{" "}
-        {commit.commit.message}
+        {firstLine(commit.commit.message)}
       </CommitItem>
     ));
   }
+}
+
+function firstLine(commitMessage: string): string {
+  return commitMessage.split("\n", 2)[0];
 }
 
 const mapStateToProps = (state: State) => ({
