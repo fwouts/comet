@@ -163,12 +163,22 @@ class App extends React.Component<{
   }
 
   private renderComparison(comparison: CompareBranchesResult) {
-    return comparison.commits.map(commit => (
-      <CommitItem key={commit.sha}>
-        <FontAwesomeIcon icon={faArrowAltCircleRight} color="green" />{" "}
-        {firstLine(commit.commit.message)}
-      </CommitItem>
-    ));
+    return (
+      <>
+        {comparison.added_commits.map(commit => (
+          <CommitItem key={commit.sha}>
+            <FontAwesomeIcon icon={faArrowAltCircleRight} color="green" />{" "}
+            {firstLine(commit.commit.message)}
+          </CommitItem>
+        ))}
+        {comparison.removed_commits.map(commit => (
+          <CommitItem key={commit.sha}>
+            <FontAwesomeIcon icon={faArrowAltCircleRight} color="red" />{" "}
+            {firstLine(commit.commit.message)}
+          </CommitItem>
+        ))}
+      </>
+    );
   }
 }
 

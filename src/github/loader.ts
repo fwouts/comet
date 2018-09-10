@@ -25,20 +25,35 @@ export async function compareBranches(
   baseBranchName: string,
   headBranchName: string
 ): Promise<CompareBranchesResult> {
-  const comparison = await octokit.repos.compareCommits({
-    owner: config.OWNER,
-    repo: config.REPO,
-    base: baseBranchName,
-    head: headBranchName
-  });
-  return comparison.data;
+  const [comparisonOneWay, comparisonOtherWay] = await Promise.all([
+    octokit.repos.compareCommits({
+      owner: config.OWNER,
+      repo: config.REPO,
+      base: baseBranchName,
+      head: headBranchName
+    }),
+    octokit.repos.compareCommits({
+      owner: config.OWNER,
+      repo: config.REPO,
+      base: headBranchName,
+      head: baseBranchName
+    })
+  ]);
+  return {
+    ahead_by: comparisonOneWay.data.ahead_by,
+    behind_by: comparisonOneWay.data.behind_by,
+    total_commits: comparisonOneWay.data.total_commits,
+    added_commits: comparisonOneWay.data.commits,
+    removed_commits: comparisonOtherWay.data.commits
+  };
 }
 
 export interface CompareBranchesResult {
   ahead_by: number;
   behind_by: number;
   total_commits: number;
-  commits: Commit[];
+  added_commits: Commit[];
+  removed_commits: Commit[];
 }
 
 export interface Commit {
