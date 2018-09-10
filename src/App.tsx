@@ -7,7 +7,8 @@ import * as React from "react";
 import { connect } from "react-redux";
 import { ClipLoader } from "react-spinners";
 import styled from "styled-components";
-import { CompareBranchesResult } from "./github/loader";
+import { OWNER, REPO } from "./config";
+import { Commit, CompareBranchesResult } from "./github/loader";
 import {
   Dispatch,
   fetchReleasesAction,
@@ -85,6 +86,18 @@ const CommitItem = styled.li`
 
   &&:nth-child(even) {
     background: #f8f8fc;
+  }
+`;
+
+const CommitSha = styled.a`
+  color: #aaa;
+  text-decoration: none;
+  font-family: "Roboto Mono", monospace;
+  font-size: 0.9em;
+
+  &&:hover {
+    color: #777;
+    text-decoration: underline;
   }
 `;
 
@@ -167,13 +180,15 @@ class App extends React.Component<{
       <>
         {comparison.added_commits.map(commit => (
           <CommitItem key={commit.sha}>
-            <FontAwesomeIcon icon={faArrowAltCircleRight} color="green" />{" "}
+            <FontAwesomeIcon icon={faArrowAltCircleRight} color="green" />
+            {commitSha(commit)}
             {firstLine(commit.commit.message)}
           </CommitItem>
         ))}
         {comparison.removed_commits.map(commit => (
           <CommitItem key={commit.sha}>
-            <FontAwesomeIcon icon={faArrowAltCircleRight} color="red" />{" "}
+            <FontAwesomeIcon icon={faArrowAltCircleRight} color="red" />
+            {commitSha(commit)}
             {firstLine(commit.commit.message)}
           </CommitItem>
         ))}
@@ -184,6 +199,20 @@ class App extends React.Component<{
 
 function firstLine(commitMessage: string): string {
   return commitMessage.split("\n", 2)[0];
+}
+
+function commitSha(commit: Commit) {
+  return (
+    <>
+      {" "}
+      <CommitSha
+        target="_blank"
+        href={`https://github.com/${OWNER}/${REPO}/commit/${commit.sha}`}
+      >
+        {commit.sha.substr(0, 7)}
+      </CommitSha>{" "}
+    </>
+  );
 }
 
 const mapStateToProps = (state: State) => ({

@@ -57,7 +57,7 @@ export interface CompareBranchesResult {
 }
 
 export interface Commit {
-  sha: number;
+  sha: string;
   commit: {
     author: {
       name: string;
