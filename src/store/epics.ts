@@ -57,15 +57,15 @@ const triggerFetchCommitsOnRefSelectEpic = (
       ) {
         return empty();
       }
-      const branchIndex = state$.value.refs.refs.findIndex(
+      const refIndex = state$.value.refs.refs.findIndex(
         r => r.name === action.refName
       );
-      if (branchIndex === state$.value.refs.refs.length - 1) {
-        // Unfortunately we don't have any previous branch to compare to.
+      if (refIndex === state$.value.refs.refs.length - 1) {
+        // Unfortunately we don't have any previous ref to compare to.
         return empty();
       }
-      const olderBranchName = state$.value.refs.refs[branchIndex + 1].name;
-      return from([fetchComparisonAction(action.refName, olderBranchName)]);
+      const compareToRefName = state$.value.refs.refs[refIndex + 1].name;
+      return from([fetchComparisonAction(action.refName, compareToRefName)]);
     })
   );
 
@@ -80,7 +80,7 @@ const fetchCommitsEpic = (
     )
   );
 
-// TODO: Consider only setting the comparison result if the branch is still selected.
+// TODO: Consider only setting the comparison result if the ref is still selected.
 function fetchComparison(
   refName: string,
   compareToRefName: string

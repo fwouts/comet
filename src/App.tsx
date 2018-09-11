@@ -17,7 +17,7 @@ const RootContainer = styled.div`
   background: #fff;
 `;
 
-const ReleasesColumn = styled.ul`
+const RefsColumn = styled.ul`
   width: 300px;
   list-style: none;
   margin: 0;
@@ -27,7 +27,7 @@ const ReleasesColumn = styled.ul`
   overflow-y: scroll;
 `;
 
-const ReleaseItem = styled.li<{
+const RefItem = styled.li<{
   selected: boolean;
 }>`
   font-weight: bold;
@@ -103,48 +103,48 @@ const Spinner = (
 );
 
 class App extends React.Component<{
-  releaseBranches: Loadable<RefsState>;
-  loadReleases(): void;
-  selectBranch(branchName: string): void;
+  refs: Loadable<RefsState>;
+  loadRefs(): void;
+  selectRef(refName: string): void;
 }> {
   public componentDidMount() {
-    this.props.loadReleases();
+    this.props.loadRefs();
   }
 
   public render() {
     return (
       <RootContainer>
-        <ReleasesColumn>
-          {this.props.releaseBranches.status === "loaded" &&
-            this.renderBranches(this.props.releaseBranches)}
-          {this.props.releaseBranches.status === "loading" && Spinner}
-        </ReleasesColumn>
-        {this.props.releaseBranches.status === "loaded" &&
-          this.props.releaseBranches.comparison && (
+        <RefsColumn>
+          {this.props.refs.status === "loaded" &&
+            this.renderRefs(this.props.refs)}
+          {this.props.refs.status === "loading" && Spinner}
+        </RefsColumn>
+        {this.props.refs.status === "loaded" &&
+          this.props.refs.comparison && (
             <ComparisonColumn>
               <ComparisonTitle>
-                Comparing {this.props.releaseBranches.selectedRefName} to{" "}
-                {this.props.releaseBranches.comparison.compareToRefName}
+                Comparing {this.props.refs.selectedRefName} to{" "}
+                {this.props.refs.comparison.compareToRefName}
               </ComparisonTitle>
-              {this.props.releaseBranches.comparison.status === "loaded" && (
+              {this.props.refs.comparison.status === "loaded" && (
                 <>
                   <ComparisonDescription>
-                    {this.props.releaseBranches.comparison.result.ahead_by}{" "}
+                    {this.props.refs.comparison.result.ahead_by}{" "}
                     commits added.
                     <br />
                     {
-                      this.props.releaseBranches.comparison.result.behind_by
+                      this.props.refs.comparison.result.behind_by
                     }{" "}
                     commits removed.
                   </ComparisonDescription>
                   <ComparisonList>
                     {this.renderComparison(
-                      this.props.releaseBranches.comparison.result
+                      this.props.refs.comparison.result
                     )}
                   </ComparisonList>
                 </>
               )}
-              {this.props.releaseBranches.comparison.status === "loading" &&
+              {this.props.refs.comparison.status === "loading" &&
                 Spinner}
             </ComparisonColumn>
           )}
@@ -152,15 +152,15 @@ class App extends React.Component<{
     );
   }
 
-  private renderBranches(releaseBranches: RefsState & LoadedState) {
-    return releaseBranches.refs.map(ref => (
-      <ReleaseItem
+  private renderRefs(refs: RefsState & LoadedState) {
+    return refs.refs.map(ref => (
+      <RefItem
         key={ref.name}
-        selected={releaseBranches.selectedRefName === ref.name}
-        onClick={() => this.props.selectBranch(ref.name)}
+        selected={refs.selectedRefName === ref.name}
+        onClick={() => this.props.selectRef(ref.name)}
       >
         <FontAwesomeIcon icon={ref.kind === 'branch' ? faCodeBranch : faTag} /> {ref.name}
-      </ReleaseItem>
+      </RefItem>
     ));
   }
 
@@ -205,12 +205,12 @@ function commitSha(commit: Commit) {
 }
 
 const mapStateToProps = (state: State) => ({
-  releaseBranches: state.refs
+  refs: state.refs
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  loadReleases: () => dispatch(fetchRefsAction()),
-  selectBranch: (branchName: string) => dispatch(selectRefAction(branchName))
+  loadRefs: () => dispatch(fetchRefsAction()),
+  selectRef: (branchName: string) => dispatch(selectRefAction(branchName))
 });
 
 const ConnectedApp = connect(
