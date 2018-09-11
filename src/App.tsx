@@ -211,6 +211,16 @@ class App extends React.Component<{
               {comparison.result.ahead_by} commits added.
               <br />
               {comparison.result.behind_by} commits removed.
+              {comparison.result.omitted_commits && (
+                <>
+                  <br />
+                  <br />
+                  <b>
+                    Only showing a subset of commits because of limitations in
+                    GitHub API.
+                  </b>
+                </>
+              )}
             </ComparisonDescription>
             <ComparisonList>
               {this.renderComparisonList(comparison.result)}

@@ -56,12 +56,18 @@ export async function compareRefs(
       head: refName
     })
   ]);
+  const githubLimit = 250;
   return {
     ahead_by: comparisonOneWay.data.ahead_by,
     behind_by: comparisonOneWay.data.behind_by,
     total_commits: comparisonOneWay.data.total_commits,
     added_commits: comparisonOneWay.data.commits,
-    removed_commits: comparisonOtherWay.data.commits
+    removed_commits: comparisonOtherWay.data.commits,
+    // GitHub will only return a maximum number of {githubLimit} commits.
+    // See https://developer.github.com/v3/repos/commits/#working-with-large-comparisons.
+    omitted_commits:
+      comparisonOneWay.data.ahead_by > githubLimit ||
+      comparisonOneWay.data.behind_by > githubLimit
   };
 }
 
@@ -71,6 +77,7 @@ export interface CompareRefsResult {
   total_commits: number;
   added_commits: Commit[];
   removed_commits: Commit[];
+  omitted_commits: boolean;
 }
 
 export interface Commit {
