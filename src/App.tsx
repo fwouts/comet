@@ -35,6 +35,9 @@ const RefItem = styled.li<{
   cursor: pointer;
   background: ${props => (props.selected ? "#111" : "transparent")};
   color: ${props => (props.selected ? "#fff" : "#000")};
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &&:hover {
     background: ${props => (props.selected ? "#111" : "#eee")};
