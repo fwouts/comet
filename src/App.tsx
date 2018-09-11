@@ -180,6 +180,10 @@ class App extends React.Component<{
     selectedRefName: string,
     comparison: CommitsState
   ) {
+    const options = refs.filter(r => r.name !== selectedRefName).map(r => ({
+      value: r.name,
+      label: r.name
+    }));
     return (
       <ComparisonColumn>
         <ComparisonHeader>
@@ -188,17 +192,11 @@ class App extends React.Component<{
           </ComparisonSelectedBranch>
           <ComparisonCompareToBranch>
             <Select
-              options={refs.filter(r => r.name !== selectedRefName).map(r => ({
-                value: r.name,
-                label: r.name
-              }))}
+              options={options}
               isOptionSelected={option =>
                 option.value === comparison.compareToRefName
               }
-              value={{
-                value: comparison.compareToRefName,
-                label: comparison.compareToRefName
-              }}
+              value={options.find(o => o.value === comparison.compareToRefName)}
               onChange={option =>
                 option &&
                 !(option instanceof Array) &&
