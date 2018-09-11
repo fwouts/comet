@@ -6,33 +6,33 @@ import {
 } from "redux-observable";
 import { empty, from, Observable } from "rxjs";
 import { catchError, merge, mergeMap } from "rxjs/operators";
-import { compareBranches, loadRefs } from "../github/loader";
+import { compareRefs, loadRefs } from "../github/loader";
 import {
   Action,
   FetchComparisonAction,
   fetchComparisonAction,
-  SelectBranchAction,
+  SelectRefAction,
   updateComparisonAction,
-  updateReleasesAction
+  updateRefsAction
 } from "./actions";
 import { State } from "./state";
 
-const fetchReleasesEpic = (
+const fetchRefsEpic = (
   action$: ActionsObservable<Action>,
   state$: StateObservable<State>
 ): Observable<Action> =>
   action$.pipe(
-    ofType("FETCH_RELEASES"),
-    mergeMap(fetchReleases)
+    ofType("FETCH_REFS"),
+    mergeMap(fetchRefs)
   );
 
-function fetchReleases(): Observable<Action> {
-  return from([updateReleasesAction({ status: "loading" })]).pipe(
+function fetchRefs(): Observable<Action> {
+  return from([updateRefsAction({ status: "loading" })]).pipe(
     merge(
       from(loadRefs()).pipe(
         mergeMap(refs =>
           from([
-            updateReleasesAction({
+            updateRefsAction({
               status: "loaded",
               refs
             })
@@ -40,33 +40,32 @@ function fetchReleases(): Observable<Action> {
         )
       )
     ),
-    catchError(error => from([updateReleasesAction({ status: "failed" })]))
+    catchError(error => from([updateRefsAction({ status: "failed" })]))
   );
 }
 
-const triggerFetchCommitsOnBranchSelectEpic = (
+const triggerFetchCommitsOnRefSelectEpic = (
   action$: ActionsObservable<Action>,
   state$: StateObservable<State>
 ): Observable<Action> =>
   action$.pipe(
-    ofType("SELECT_BRANCH"),
-    mergeMap((action: SelectBranchAction) => {
+    ofType("SELECT_REF"),
+    mergeMap((action: SelectRefAction) => {
       if (
-        state$.value.releaseBranches.status !== "loaded" ||
-        !state$.value.releaseBranches.selectedBranchName
+        state$.value.refs.status !== "loaded" ||
+        !state$.value.refs.selectedRefName
       ) {
         return empty();
       }
-      const branchIndex = state$.value.releaseBranches.refs.findIndex(
-        r => r.name === action.branchName
+      const branchIndex = state$.value.refs.refs.findIndex(
+        r => r.name === action.refName
       );
-      if (branchIndex === state$.value.releaseBranches.refs.length - 1) {
+      if (branchIndex === state$.value.refs.refs.length - 1) {
         // Unfortunately we don't have any previous branch to compare to.
         return empty();
       }
-      const olderBranchName =
-        state$.value.releaseBranches.refs[branchIndex + 1].name;
-      return from([fetchComparisonAction(action.branchName, olderBranchName)]);
+      const olderBranchName = state$.value.refs.refs[branchIndex + 1].name;
+      return from([fetchComparisonAction(action.refName, olderBranchName)]);
     })
   );
 
@@ -77,25 +76,25 @@ const fetchCommitsEpic = (
   action$.pipe(
     ofType("FETCH_COMPARISON"),
     mergeMap((action: FetchComparisonAction) =>
-      fetchComparison(action.branchName, action.olderBranchName)
+      fetchComparison(action.refName, action.compareToRefName)
     )
   );
 
 // TODO: Consider only setting the comparison result if the branch is still selected.
 function fetchComparison(
-  branchName: string,
-  olderBranchName: string
+  refName: string,
+  compareToRefName: string
 ): Observable<Action> {
   return from([
-    updateComparisonAction(branchName, { status: "loading", olderBranchName })
+    updateComparisonAction(refName, { status: "loading", compareToRefName })
   ]).pipe(
     merge(
-      from(compareBranches(olderBranchName, branchName)).pipe(
+      from(compareRefs(compareToRefName, refName)).pipe(
         mergeMap(comparison =>
           from([
-            updateComparisonAction(branchName, {
+            updateComparisonAction(refName, {
               status: "loaded",
-              olderBranchName,
+              compareToRefName,
               result: comparison
             })
           ])
@@ -104,9 +103,9 @@ function fetchComparison(
     ),
     catchError(error =>
       from([
-        updateComparisonAction(branchName, {
+        updateComparisonAction(refName, {
           status: "failed",
-          olderBranchName
+          compareToRefName
         })
       ])
     )
@@ -114,7 +113,7 @@ function fetchComparison(
 }
 
 export const rootEpic = combineEpics(
-  fetchReleasesEpic,
-  triggerFetchCommitsOnBranchSelectEpic,
+  fetchRefsEpic,
+  triggerFetchCommitsOnRefSelectEpic,
   fetchCommitsEpic
 );

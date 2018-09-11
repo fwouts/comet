@@ -1,80 +1,78 @@
 import * as redux from "redux";
-import { CommitsState, Loadable, ReleaseBranchesState } from "./state";
+import { CommitsState, Loadable, RefsState } from "./state";
 
 export type Action =
-  | FetchReleasesAction
-  | UpdateReleasesAction
-  | SelectBranchAction
+  | FetchRefsAction
+  | UpdateRefsAction
+  | SelectRefAction
   | FetchComparisonAction
   | UpdateComparisonAction;
 export type Dispatch = redux.Dispatch<Action>;
 
-export interface FetchReleasesAction {
-  type: "FETCH_RELEASES";
+export interface FetchRefsAction {
+  type: "FETCH_REFS";
 }
 
-export function fetchReleasesAction(): FetchReleasesAction {
+export function fetchRefsAction(): FetchRefsAction {
   return {
-    type: "FETCH_RELEASES"
+    type: "FETCH_REFS"
   };
 }
 
-export interface UpdateReleasesAction {
-  type: "UPDATE_RELEASES";
-  releaseBranches: Loadable<ReleaseBranchesState>;
+export interface UpdateRefsAction {
+  type: "UPDATE_REFS";
+  refs: Loadable<RefsState>;
 }
 
-export function updateReleasesAction(
-  releaseBranches: Loadable<ReleaseBranchesState>
-): UpdateReleasesAction {
+export function updateRefsAction(refs: Loadable<RefsState>): UpdateRefsAction {
   return {
-    type: "UPDATE_RELEASES",
-    releaseBranches
+    type: "UPDATE_REFS",
+    refs
   };
 }
 
-export interface SelectBranchAction {
-  type: "SELECT_BRANCH";
-  branchName: string;
+export interface SelectRefAction {
+  type: "SELECT_REF";
+  refName: string;
 }
 
-export function selectBranchAction(branchName: string): SelectBranchAction {
+export function selectRefAction(refName: string): SelectRefAction {
   return {
-    type: "SELECT_BRANCH",
-    branchName
+    type: "SELECT_REF",
+    refName
   };
 }
 
 export interface FetchComparisonAction {
   type: "FETCH_COMPARISON";
-  branchName: string;
-  olderBranchName: string;
+  refName: string;
+  compareToRefName: string;
 }
 
 export function fetchComparisonAction(
-  branchName: string,
-  olderBranchName: string
+  refName: string,
+  compareToRefName: string
 ): FetchComparisonAction {
   return {
     type: "FETCH_COMPARISON",
-    branchName,
-    olderBranchName
+    refName,
+    compareToRefName
   };
 }
 
 export interface UpdateComparisonAction {
   type: "UPDATE_COMPARISON";
-  branchName: string;
+  refName: string;
   comparison: CommitsState;
 }
 
 export function updateComparisonAction(
-  branchName: string,
+  refName: string,
   comparison: CommitsState
 ): UpdateComparisonAction {
   return {
     type: "UPDATE_COMPARISON",
-    branchName,
+    refName,
     comparison
   };
 }

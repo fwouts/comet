@@ -9,7 +9,7 @@ octokit.authenticate({
 });
 
 /**
- * Loads the list of release branches.
+ * Loads the list of refs (branches and tags).
  */
 export async function loadRefs(): Promise<Ref[]> {
   const tagsResponse = await octokit.repos.getTags({
@@ -36,24 +36,24 @@ export async function loadRefs(): Promise<Ref[]> {
 }
 
 /**
- * Compares two branches.
+ * Compares two refs.
  */
-export async function compareBranches(
-  baseBranchName: string,
-  headBranchName: string
-): Promise<CompareBranchesResult> {
+export async function compareRefs(
+  refName: string,
+  compareToRefName: string
+): Promise<CompareRefsResult> {
   const [comparisonOneWay, comparisonOtherWay] = await Promise.all([
     octokit.repos.compareCommits({
       owner: config.OWNER,
       repo: config.REPO,
-      base: baseBranchName,
-      head: headBranchName
+      base: refName,
+      head: compareToRefName
     }),
     octokit.repos.compareCommits({
       owner: config.OWNER,
       repo: config.REPO,
-      base: headBranchName,
-      head: baseBranchName
+      base: compareToRefName,
+      head: refName
     })
   ]);
   return {
@@ -65,7 +65,7 @@ export async function compareBranches(
   };
 }
 
-export interface CompareBranchesResult {
+export interface CompareRefsResult {
   ahead_by: number;
   behind_by: number;
   total_commits: number;

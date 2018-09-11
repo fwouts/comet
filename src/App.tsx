@@ -5,9 +5,9 @@ import { connect } from "react-redux";
 import { ClipLoader } from "react-spinners";
 import styled from "styled-components";
 import { OWNER, REPO } from "./config";
-import { Commit, CompareBranchesResult } from "./github/loader";
-import { Dispatch, fetchReleasesAction, selectBranchAction } from "./store/actions";
-import { Loadable, LoadedState, ReleaseBranchesState, State } from "./store/state";
+import { Commit, CompareRefsResult } from "./github/loader";
+import { Dispatch, fetchRefsAction, selectRefAction } from "./store/actions";
+import { Loadable, LoadedState, RefsState, State } from "./store/state";
 
 const RootContainer = styled.div`
   display: flex;
@@ -103,7 +103,7 @@ const Spinner = (
 );
 
 class App extends React.Component<{
-  releaseBranches: Loadable<ReleaseBranchesState>;
+  releaseBranches: Loadable<RefsState>;
   loadReleases(): void;
   selectBranch(branchName: string): void;
 }> {
@@ -123,8 +123,8 @@ class App extends React.Component<{
           this.props.releaseBranches.comparison && (
             <ComparisonColumn>
               <ComparisonTitle>
-                Comparing {this.props.releaseBranches.selectedBranchName} to{" "}
-                {this.props.releaseBranches.comparison.olderBranchName}
+                Comparing {this.props.releaseBranches.selectedRefName} to{" "}
+                {this.props.releaseBranches.comparison.compareToRefName}
               </ComparisonTitle>
               {this.props.releaseBranches.comparison.status === "loaded" && (
                 <>
@@ -152,11 +152,11 @@ class App extends React.Component<{
     );
   }
 
-  private renderBranches(releaseBranches: ReleaseBranchesState & LoadedState) {
+  private renderBranches(releaseBranches: RefsState & LoadedState) {
     return releaseBranches.refs.map(ref => (
       <ReleaseItem
         key={ref.name}
-        selected={releaseBranches.selectedBranchName === ref.name}
+        selected={releaseBranches.selectedRefName === ref.name}
         onClick={() => this.props.selectBranch(ref.name)}
       >
         <FontAwesomeIcon icon={ref.kind === 'branch' ? faCodeBranch : faTag} /> {ref.name}
@@ -164,7 +164,7 @@ class App extends React.Component<{
     ));
   }
 
-  private renderComparison(comparison: CompareBranchesResult) {
+  private renderComparison(comparison: CompareRefsResult) {
     return (
       <>
         {comparison.added_commits.map(commit => (
@@ -205,12 +205,12 @@ function commitSha(commit: Commit) {
 }
 
 const mapStateToProps = (state: State) => ({
-  releaseBranches: state.releaseBranches
+  releaseBranches: state.refs
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  loadReleases: () => dispatch(fetchReleasesAction()),
-  selectBranch: (branchName: string) => dispatch(selectBranchAction(branchName))
+  loadReleases: () => dispatch(fetchRefsAction()),
+  selectBranch: (branchName: string) => dispatch(selectRefAction(branchName))
 });
 
 const ConnectedApp = connect(

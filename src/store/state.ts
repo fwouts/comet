@@ -1,4 +1,4 @@
-import { CompareBranchesResult } from "../github/loader";
+import { CompareRefsResult } from "../github/loader";
 
 export type Loadable<T, S = {}> = (
   | LoadingState
@@ -19,12 +19,12 @@ export interface FailedState {
 }
 
 export interface State {
-  releaseBranches: Loadable<ReleaseBranchesState>;
+  refs: Loadable<RefsState>;
 }
 
-export interface ReleaseBranchesState {
+export interface RefsState {
   refs: Ref[];
-  selectedBranchName?: string;
+  selectedRefName?: string;
   comparison?: CommitsState;
 }
 
@@ -42,10 +42,10 @@ export interface Tag {
 
 export type CommitsState = Loadable<
   {
-    result: CompareBranchesResult;
+    result: CompareRefsResult;
   },
   {
-    olderBranchName: string;
+    compareToRefName: string;
   }
 >;
 

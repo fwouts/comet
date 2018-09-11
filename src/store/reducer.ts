@@ -3,39 +3,39 @@ import { State } from "./state";
 
 export const rootReducer = (
   state: State = {
-    releaseBranches: {
+    refs: {
       status: "loading"
     }
   },
   action: Action
 ): State => {
   switch (action.type) {
-    case "UPDATE_RELEASES":
+    case "UPDATE_REFS":
       return {
         ...state,
-        releaseBranches: action.releaseBranches
+        refs: action.refs
       };
-    case "SELECT_BRANCH":
-      if (state.releaseBranches && state.releaseBranches.status === "loaded") {
+    case "SELECT_REF":
+      if (state.refs && state.refs.status === "loaded") {
         return {
           ...state,
-          releaseBranches: {
-            ...state.releaseBranches,
-            selectedBranchName: action.branchName
+          refs: {
+            ...state.refs,
+            selectedRefName: action.refName
           }
         };
       }
       return state;
     case "UPDATE_COMPARISON":
       if (
-        state.releaseBranches &&
-        state.releaseBranches.status === "loaded" &&
-        state.releaseBranches.selectedBranchName === action.branchName
+        state.refs &&
+        state.refs.status === "loaded" &&
+        state.refs.selectedRefName === action.refName
       ) {
         return {
           ...state,
-          releaseBranches: {
-            ...state.releaseBranches,
+          refs: {
+            ...state.refs,
             comparison: action.comparison
           }
         };
