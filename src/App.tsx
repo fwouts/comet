@@ -1,13 +1,30 @@
-import { faArrowAltCircleRight, faCodeBranch, faTag } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowAltCircleRight,
+  faCodeBranch,
+  faTag
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as React from "react";
 import { connect } from "react-redux";
+import Select from "react-select";
 import { ClipLoader } from "react-spinners";
 import styled from "styled-components";
 import { OWNER, REPO } from "./config";
 import { Commit, CompareRefsResult } from "./github/loader";
-import { Dispatch, fetchRefsAction, selectRefAction } from "./store/actions";
-import { Loadable, LoadedState, RefsState, State } from "./store/state";
+import {
+  Dispatch,
+  fetchComparisonAction,
+  fetchRefsAction,
+  selectRefAction
+} from "./store/actions";
+import {
+  CommitsState,
+  Loadable,
+  LoadedState,
+  Ref,
+  RefsState,
+  State
+} from "./store/state";
 
 const RootContainer = styled.div`
   display: flex;
@@ -49,10 +66,20 @@ const ComparisonColumn = styled.div`
   overflow-y: scroll;
 `;
 
-const ComparisonTitle = styled.h2`
+const ComparisonHeader = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
+const ComparisonSelectedBranch = styled.h2`
   margin: 0;
   padding: 12px;
   font-size: 1.2em;
+`;
+
+const ComparisonCompareToBranch = styled.div`
+  padding: 6px;
+  flex-grow: 1;
 `;
 
 const ComparisonDescription = styled.p`
@@ -109,6 +136,7 @@ class App extends React.Component<{
   refs: Loadable<RefsState>;
   loadRefs(): void;
   selectRef(refName: string): void;
+  compareToAnotherRef(selectedRefName: string, compareToRefName: string): void;
 }> {
   public componentDidMount() {
     this.props.loadRefs();
@@ -123,33 +151,12 @@ class App extends React.Component<{
           {this.props.refs.status === "loading" && Spinner}
         </RefsColumn>
         {this.props.refs.status === "loaded" &&
-          this.props.refs.comparison && (
-            <ComparisonColumn>
-              <ComparisonTitle>
-                Comparing {this.props.refs.selectedRefName} to{" "}
-                {this.props.refs.comparison.compareToRefName}
-              </ComparisonTitle>
-              {this.props.refs.comparison.status === "loaded" && (
-                <>
-                  <ComparisonDescription>
-                    {this.props.refs.comparison.result.ahead_by}{" "}
-                    commits added.
-                    <br />
-                    {
-                      this.props.refs.comparison.result.behind_by
-                    }{" "}
-                    commits removed.
-                  </ComparisonDescription>
-                  <ComparisonList>
-                    {this.renderComparison(
-                      this.props.refs.comparison.result
-                    )}
-                  </ComparisonList>
-                </>
-              )}
-              {this.props.refs.comparison.status === "loading" &&
-                Spinner}
-            </ComparisonColumn>
+          this.props.refs.selectedRefName &&
+          this.props.refs.comparison &&
+          this.renderComparisonColumn(
+            this.props.refs.refs,
+            this.props.refs.selectedRefName,
+            this.props.refs.comparison
           )}
       </RootContainer>
     );
@@ -162,12 +169,62 @@ class App extends React.Component<{
         selected={refs.selectedRefName === ref.name}
         onClick={() => this.props.selectRef(ref.name)}
       >
-        <FontAwesomeIcon icon={ref.kind === 'branch' ? faCodeBranch : faTag} /> {ref.name}
+        <FontAwesomeIcon icon={ref.kind === "branch" ? faCodeBranch : faTag} />{" "}
+        {ref.name}
       </RefItem>
     ));
   }
 
-  private renderComparison(comparison: CompareRefsResult) {
+  private renderComparisonColumn(
+    refs: Ref[],
+    selectedRefName: string,
+    comparison: CommitsState
+  ) {
+    return (
+      <ComparisonColumn>
+        <ComparisonHeader>
+          <ComparisonSelectedBranch>
+            Comparing {selectedRefName} to{" "}
+          </ComparisonSelectedBranch>
+          <ComparisonCompareToBranch>
+            <Select
+              options={refs.filter(r => r.name !== selectedRefName).map(r => ({
+                value: r.name,
+                label: r.name
+              }))}
+              isOptionSelected={option =>
+                option.value === comparison.compareToRefName
+              }
+              value={{
+                value: comparison.compareToRefName,
+                label: comparison.compareToRefName
+              }}
+              onChange={option =>
+                option &&
+                !(option instanceof Array) &&
+                this.props.compareToAnotherRef(selectedRefName, option.value)
+              }
+            />
+          </ComparisonCompareToBranch>
+        </ComparisonHeader>
+        {comparison.status === "loaded" && (
+          <>
+            <ComparisonDescription>
+              {comparison.result.ahead_by} commits added.
+              <br />
+              {comparison.result.behind_by} commits removed.
+            </ComparisonDescription>
+            <ComparisonList>
+              {this.renderComparisonList(comparison.result)}
+            </ComparisonList>
+          </>
+        )}
+        {comparison.status === "loading" && Spinner}
+      </ComparisonColumn>
+    );
+  }
+
+  private renderComparisonList(comparison: CompareRefsResult) {
     return (
       <>
         {comparison.added_commits.map(commit => (
@@ -213,7 +270,9 @@ const mapStateToProps = (state: State) => ({
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
   loadRefs: () => dispatch(fetchRefsAction()),
-  selectRef: (branchName: string) => dispatch(selectRefAction(branchName))
+  selectRef: (refName: string) => dispatch(selectRefAction(refName)),
+  compareToAnotherRef: (selectedRefName: string, compareToRefName: string) =>
+    dispatch(fetchComparisonAction(selectedRefName, compareToRefName))
 });
 
 const ConnectedApp = connect(
