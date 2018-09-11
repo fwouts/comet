@@ -1,7 +1,4 @@
-import {
-  faArrowAltCircleRight,
-  faCodeBranch
-} from "@fortawesome/free-solid-svg-icons";
+import { faArrowAltCircleRight, faCodeBranch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as React from "react";
 import { connect } from "react-redux";
@@ -9,16 +6,8 @@ import { ClipLoader } from "react-spinners";
 import styled from "styled-components";
 import { OWNER, REPO } from "./config";
 import { Commit, CompareBranchesResult } from "./github/loader";
-import {
-  Dispatch,
-  fetchReleasesAction,
-  selectBranchAction
-} from "./store/actions";
-import {
-  LoadedReleaseBranchesState,
-  ReleaseBranchesState,
-  State
-} from "./store/state";
+import { Dispatch, fetchReleasesAction, selectBranchAction } from "./store/actions";
+import { Loadable, LoadedState, ReleaseBranchesState, State } from "./store/state";
 
 const RootContainer = styled.div`
   display: flex;
@@ -114,7 +103,7 @@ const Spinner = (
 );
 
 class App extends React.Component<{
-  releaseBranches: ReleaseBranchesState;
+  releaseBranches: Loadable<ReleaseBranchesState>;
   loadReleases(): void;
   selectBranch(branchName: string): void;
 }> {
@@ -163,7 +152,7 @@ class App extends React.Component<{
     );
   }
 
-  private renderBranches(releaseBranches: LoadedReleaseBranchesState) {
+  private renderBranches(releaseBranches: ReleaseBranchesState & LoadedState) {
     return releaseBranches.names.map(name => (
       <ReleaseItem
         key={name}

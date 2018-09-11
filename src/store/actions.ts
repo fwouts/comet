@@ -1,5 +1,5 @@
 import * as redux from "redux";
-import { CommitsState, ReleaseBranchesState } from "./state";
+import { CommitsState, Loadable, ReleaseBranchesState } from "./state";
 
 export type Action =
   | FetchReleasesAction
@@ -21,11 +21,11 @@ export function fetchReleasesAction(): FetchReleasesAction {
 
 export interface UpdateReleasesAction {
   type: "UPDATE_RELEASES";
-  releaseBranches: ReleaseBranchesState;
+  releaseBranches: Loadable<ReleaseBranchesState>;
 }
 
 export function updateReleasesAction(
-  releaseBranches: ReleaseBranchesState
+  releaseBranches: Loadable<ReleaseBranchesState>
 ): UpdateReleasesAction {
   return {
     type: "UPDATE_RELEASES",
