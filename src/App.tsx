@@ -1,4 +1,4 @@
-import { faArrowAltCircleRight, faCodeBranch } from "@fortawesome/free-solid-svg-icons";
+import { faArrowAltCircleRight, faCodeBranch, faTag } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as React from "react";
 import { connect } from "react-redux";
@@ -153,13 +153,13 @@ class App extends React.Component<{
   }
 
   private renderBranches(releaseBranches: ReleaseBranchesState & LoadedState) {
-    return releaseBranches.names.map(name => (
+    return releaseBranches.refs.map(ref => (
       <ReleaseItem
-        key={name}
-        selected={releaseBranches.selectedBranchName === name}
-        onClick={() => this.props.selectBranch(name)}
+        key={ref.name}
+        selected={releaseBranches.selectedBranchName === ref.name}
+        onClick={() => this.props.selectBranch(ref.name)}
       >
-        <FontAwesomeIcon icon={faCodeBranch} /> {name}
+        <FontAwesomeIcon icon={ref.kind === 'branch' ? faCodeBranch : faTag} /> {ref.name}
       </ReleaseItem>
     ));
   }

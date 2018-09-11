@@ -23,9 +23,21 @@ export interface State {
 }
 
 export interface ReleaseBranchesState {
-  names: string[];
+  refs: Ref[];
   selectedBranchName?: string;
   comparison?: CommitsState;
+}
+
+export type Ref = Branch | Tag;
+
+export interface Branch {
+  kind: "branch";
+  name: string;
+}
+
+export interface Tag {
+  kind: "tag";
+  name: string;
 }
 
 export type CommitsState = Loadable<

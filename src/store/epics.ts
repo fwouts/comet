@@ -6,7 +6,7 @@ import {
 } from "redux-observable";
 import { empty, from, Observable } from "rxjs";
 import { catchError, merge, mergeMap } from "rxjs/operators";
-import { compareBranches, loadReleaseBranchNames } from "../github/loader";
+import { compareBranches, loadRefs } from "../github/loader";
 import {
   Action,
   FetchComparisonAction,
@@ -29,12 +29,12 @@ const fetchReleasesEpic = (
 function fetchReleases(): Observable<Action> {
   return from([updateReleasesAction({ status: "loading" })]).pipe(
     merge(
-      from(loadReleaseBranchNames()).pipe(
-        mergeMap(branchNames =>
+      from(loadRefs()).pipe(
+        mergeMap(refs =>
           from([
             updateReleasesAction({
               status: "loaded",
-              names: branchNames
+              refs
             })
           ])
         )
@@ -57,15 +57,15 @@ const triggerFetchCommitsOnBranchSelectEpic = (
       ) {
         return empty();
       }
-      const branchIndex = state$.value.releaseBranches.names.findIndex(
-        n => n === action.branchName
+      const branchIndex = state$.value.releaseBranches.refs.findIndex(
+        r => r.name === action.branchName
       );
-      if (branchIndex === state$.value.releaseBranches.names.length - 1) {
+      if (branchIndex === state$.value.releaseBranches.refs.length - 1) {
         // Unfortunately we don't have any previous branch to compare to.
         return empty();
       }
       const olderBranchName =
-        state$.value.releaseBranches.names[branchIndex + 1];
+        state$.value.releaseBranches.refs[branchIndex + 1].name;
       return from([fetchComparisonAction(action.branchName, olderBranchName)]);
     })
   );

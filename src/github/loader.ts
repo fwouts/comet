@@ -1,5 +1,6 @@
 import * as Octokit from "@octokit/rest";
 import * as config from "../config";
+import { Branch, Ref, Tag } from "../store/state";
 
 const octokit = new Octokit();
 octokit.authenticate({
@@ -10,12 +11,28 @@ octokit.authenticate({
 /**
  * Loads the list of release branches.
  */
-export async function loadReleaseBranchNames(): Promise<string[]> {
-  const tags = await octokit.repos.getTags({
+export async function loadRefs(): Promise<Ref[]> {
+  const tagsResponse = await octokit.repos.getTags({
     owner: config.OWNER,
     repo: config.REPO
   });
-  return tags.data.map(t => t.name);
+  const tags = tagsResponse.data.map(
+    (b): Tag => ({
+      kind: "tag",
+      name: b.name
+    })
+  );
+  const branchesResponse = await octokit.repos.getBranches({
+    owner: config.OWNER,
+    repo: config.REPO
+  });
+  const branches = branchesResponse.data.map(
+    (b): Branch => ({
+      kind: "branch",
+      name: b.name
+    })
+  );
+  return [...branches, ...tags];
 }
 
 /**
