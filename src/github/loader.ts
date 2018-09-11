@@ -58,26 +58,24 @@ export async function compareRefs(
   ]);
   const githubLimit = 250;
   return {
-    ahead_by: comparisonOneWay.data.ahead_by,
-    behind_by: comparisonOneWay.data.behind_by,
-    total_commits: comparisonOneWay.data.total_commits,
-    added_commits: comparisonOneWay.data.commits,
-    removed_commits: comparisonOtherWay.data.commits,
+    aheadBy: comparisonOneWay.data.ahead_by,
+    behindBy: comparisonOneWay.data.behind_by,
+    addedCommits: comparisonOneWay.data.commits,
+    removedCommits: comparisonOtherWay.data.commits,
     // GitHub will only return a maximum number of {githubLimit} commits.
     // See https://developer.github.com/v3/repos/commits/#working-with-large-comparisons.
-    omitted_commits:
+    hadToOmitCommits:
       comparisonOneWay.data.ahead_by > githubLimit ||
       comparisonOneWay.data.behind_by > githubLimit
   };
 }
 
 export interface CompareRefsResult {
-  ahead_by: number;
-  behind_by: number;
-  total_commits: number;
-  added_commits: Commit[];
-  removed_commits: Commit[];
-  omitted_commits: boolean;
+  aheadBy: number;
+  behindBy: number;
+  addedCommits: Commit[];
+  removedCommits: Commit[];
+  hadToOmitCommits: boolean;
 }
 
 export interface Commit {

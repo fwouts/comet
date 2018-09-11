@@ -208,10 +208,10 @@ class App extends React.Component<{
         {comparison.status === "loaded" && (
           <>
             <ComparisonDescription>
-              {comparison.result.ahead_by} commits added.
+              {comparison.result.aheadBy} commits added.
               <br />
-              {comparison.result.behind_by} commits removed.
-              {comparison.result.omitted_commits && (
+              {comparison.result.behindBy} commits removed.
+              {comparison.result.hadToOmitCommits && (
                 <>
                   <br />
                   <br />
@@ -235,14 +235,14 @@ class App extends React.Component<{
   private renderComparisonList(comparison: CompareRefsResult) {
     return (
       <>
-        {comparison.added_commits.map(commit => (
+        {comparison.addedCommits.map(commit => (
           <CommitItem key={commit.sha}>
             <FontAwesomeIcon icon={faArrowAltCircleRight} color="green" />
             {commitSha(commit)}
             {firstLine(commit.commit.message)}
           </CommitItem>
         ))}
-        {comparison.removed_commits.map(commit => (
+        {comparison.removedCommits.map(commit => (
           <CommitItem key={commit.sha}>
             <FontAwesomeIcon icon={faArrowAltCircleRight} color="red" />
             {commitSha(commit)}
