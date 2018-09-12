@@ -16,10 +16,12 @@ const devToolsExtension = (window as any).devToolsExtension;
 const epicMiddleware = createEpicMiddleware<Action, Action, State>();
 const store = createStore(
   rootReducer,
-  compose(
-    applyMiddleware(epicMiddleware),
-    devToolsExtension ? devToolsExtension() : undefined
-  )
+  devToolsExtension
+    ? compose(
+        applyMiddleware(epicMiddleware),
+        devToolsExtension()
+      )
+    : applyMiddleware(epicMiddleware)
 );
 epicMiddleware.run(rootEpic);
 
