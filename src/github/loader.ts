@@ -12,27 +12,46 @@ octokit.authenticate({
  * Loads the list of refs (branches and tags).
  */
 export async function loadRefs(): Promise<Ref[]> {
-  const tagsResponse = await octokit.repos.getTags({
+  const refs: Ref[] = [];
+  let branchesResponse = await octokit.repos.getBranches({
     owner: config.OWNER,
     repo: config.REPO
   });
-  const tags = tagsResponse.data.map(
-    (b): Tag => ({
+  refs.push(...extractBranches(branchesResponse.data));
+  while (octokit.hasNextPage(branchesResponse as any)) {
+    branchesResponse = await octokit.getNextPage(branchesResponse as any);
+    refs.push(...extractBranches(branchesResponse.data));
+  }
+  let tagsResponse = await octokit.repos.getTags({
+    owner: config.OWNER,
+    repo: config.REPO
+  });
+  refs.push(...extractTags(tagsResponse.data));
+  while (octokit.hasNextPage(tagsResponse as any)) {
+    tagsResponse = await octokit.getNextPage(tagsResponse as any);
+    refs.push(...extractTags(tagsResponse.data));
+  }
+  return refs;
+}
+
+function extractTags(tagsResponse: Octokit.GetTagsResponse): Tag[] {
+  return tagsResponse.map(
+    (t): Tag => ({
       kind: "tag",
-      name: b.name
+      name: t.name
     })
   );
-  const branchesResponse = await octokit.repos.getBranches({
-    owner: config.OWNER,
-    repo: config.REPO
-  });
-  const branches = branchesResponse.data.map(
+}
+
+function extractBranches(
+  branchesResponse: Octokit.GetBranchesResponse
+): Branch[] {
+  return branchesResponse.map(
     (b): Branch => ({
       kind: "branch",
       name: b.name
     })
   );
-  return [...branches, ...tags];
 }
 
 /**
