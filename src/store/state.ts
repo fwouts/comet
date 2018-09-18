@@ -1,10 +1,15 @@
 import { CompareRefsResult, Repo } from "../github/loader";
 
 export type Loadable<T, S = {}> = (
+  | EmptyState
   | LoadingState
   | (LoadedState & T)
   | FailedState) &
   S;
+
+export interface EmptyState {
+  status: Empty;
+}
 
 export interface LoadedState {
   status: Loaded;
@@ -54,7 +59,7 @@ export type CommitsState = Loadable<
   }
 >;
 
-export type LoadingStatus = Loading | Loaded | Failed;
+export type Empty = "empty";
 
 export type Loading = "loading";
 

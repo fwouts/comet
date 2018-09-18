@@ -4,10 +4,10 @@ import { State } from "./state";
 export const rootReducer = (
   state: State = {
     repos: {
-      status: "loading"
+      status: "empty"
     },
     refs: {
-      status: "loading"
+      status: "empty"
     }
   },
   action: Action
