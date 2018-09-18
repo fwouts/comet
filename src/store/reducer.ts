@@ -1,13 +1,14 @@
+import { OWNER, REPO } from "../config";
 import { Action } from "./actions";
-import { State } from "./state";
+import { EMPTY_STATE, State } from "./state";
 
 export const rootReducer = (
   state: State = {
-    repos: {
-      status: "empty"
-    },
-    refs: {
-      status: "empty"
+    repos: EMPTY_STATE,
+    currentRepo: {
+      owner: OWNER,
+      repo: REPO,
+      refs: EMPTY_STATE
     }
   },
   action: Action
@@ -19,36 +20,53 @@ export const rootReducer = (
         repos: action.repos
       };
     case "UPDATE_REFS":
+      if (!state.currentRepo) {
+        return state;
+      }
       return {
         ...state,
-        refs: action.refs
+        currentRepo: {
+          ...state.currentRepo,
+          refs: action.refs
+        }
       };
     case "SELECT_REF":
-      if (state.refs && state.refs.status === "loaded") {
-        return {
-          ...state,
+      if (
+        !state.currentRepo ||
+        !state.currentRepo.refs ||
+        state.currentRepo.refs.status !== "loaded"
+      ) {
+        return state;
+      }
+      return {
+        ...state,
+        currentRepo: {
+          ...state.currentRepo,
           refs: {
-            ...state.refs,
+            ...state.currentRepo.refs,
             selectedRefName: action.refName
           }
-        };
-      }
-      return state;
+        }
+      };
     case "UPDATE_COMPARISON":
       if (
-        state.refs &&
-        state.refs.status === "loaded" &&
-        state.refs.selectedRefName === action.refName
+        !state.currentRepo ||
+        !state.currentRepo.refs ||
+        state.currentRepo.refs.status !== "loaded" ||
+        state.currentRepo.refs.selectedRefName !== action.refName
       ) {
-        return {
-          ...state,
+        return state;
+      }
+      return {
+        ...state,
+        currentRepo: {
+          ...state.currentRepo,
           refs: {
-            ...state.refs,
+            ...state.currentRepo.refs,
             comparison: action.comparison
           }
-        };
-      }
-      return state;
+        }
+      };
     default:
       return state;
   }

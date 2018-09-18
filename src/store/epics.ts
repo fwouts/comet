@@ -51,13 +51,19 @@ const fetchRefsEpic = (
 ): Observable<Action> =>
   action$.pipe(
     ofType("FETCH_REFS"),
-    mergeMap(fetchRefs)
+    mergeMap(() => {
+      const currentRepo = state$.value.currentRepo;
+      if (!currentRepo) {
+        return empty();
+      }
+      return fetchRefs(currentRepo.owner, currentRepo.repo);
+    })
   );
 
-function fetchRefs(): Observable<Action> {
+function fetchRefs(owner: string, repo: string): Observable<Action> {
   return from([updateRefsAction({ status: "loading" })]).pipe(
     merge(
-      from(loadRefs()).pipe(
+      from(loadRefs(owner, repo)).pipe(
         mergeMap(refs =>
           from([
             updateRefsAction({
@@ -80,19 +86,21 @@ const triggerFetchCommitsOnRefSelectEpic = (
     ofType("SELECT_REF"),
     mergeMap((action: SelectRefAction) => {
       if (
-        state$.value.refs.status !== "loaded" ||
-        !state$.value.refs.selectedRefName
+        !state$.value.currentRepo ||
+        state$.value.currentRepo.refs.status !== "loaded" ||
+        !state$.value.currentRepo.refs.selectedRefName
       ) {
         return empty();
       }
-      const refIndex = state$.value.refs.refs.findIndex(
+      const refIndex = state$.value.currentRepo.refs.refs.findIndex(
         r => r.name === action.refName
       );
-      if (refIndex === state$.value.refs.refs.length - 1) {
+      if (refIndex === state$.value.currentRepo.refs.refs.length - 1) {
         // Unfortunately we don't have any previous ref to compare to.
         return empty();
       }
-      const compareToRefName = state$.value.refs.refs[refIndex + 1].name;
+      const compareToRefName =
+        state$.value.currentRepo.refs.refs[refIndex + 1].name;
       return from([fetchComparisonAction(action.refName, compareToRefName)]);
     })
   );
@@ -103,13 +111,24 @@ const fetchCommitsEpic = (
 ): Observable<Action> =>
   action$.pipe(
     ofType("FETCH_COMPARISON"),
-    mergeMap((action: FetchComparisonAction) =>
-      fetchComparison(action.refName, action.compareToRefName)
-    )
+    mergeMap((action: FetchComparisonAction) => {
+      const currentRepo = state$.value.currentRepo;
+      if (!currentRepo) {
+        return empty();
+      }
+      return fetchComparison(
+        currentRepo.owner,
+        currentRepo.repo,
+        action.refName,
+        action.compareToRefName
+      );
+    })
   );
 
 // TODO: Consider only setting the comparison result if the ref is still selected.
 function fetchComparison(
+  owner: string,
+  repo: string,
   refName: string,
   compareToRefName: string
 ): Observable<Action> {
@@ -117,7 +136,7 @@ function fetchComparison(
     updateComparisonAction(refName, { status: "loading", compareToRefName })
   ]).pipe(
     merge(
-      from(compareRefs(compareToRefName, refName)).pipe(
+      from(compareRefs(owner, repo, compareToRefName, refName)).pipe(
         mergeMap(comparison =>
           from([
             updateComparisonAction(refName, {

@@ -9,7 +9,6 @@ import { connect } from "react-redux";
 import Select from "react-select";
 import { ClipLoader } from "react-spinners";
 import styled from "styled-components";
-import { OWNER, REPO } from "./config";
 import { Commit, CompareRefsResult } from "./github/loader";
 import {
   Dispatch,
@@ -20,6 +19,7 @@ import {
 } from "./store/actions";
 import {
   CommitsState,
+  EMPTY_STATE,
   Loadable,
   LoadedState,
   Ref,
@@ -265,10 +265,7 @@ function commitSha(commit: Commit) {
   return (
     <>
       {" "}
-      <CommitSha
-        target="_blank"
-        href={`https://github.com/${OWNER}/${REPO}/commit/${commit.sha}`}
-      >
+      <CommitSha target="_blank" href={commit.html_url}>
         {commit.sha.substr(0, 7)}
       </CommitSha>{" "}
     </>
@@ -276,7 +273,7 @@ function commitSha(commit: Commit) {
 }
 
 const mapStateToProps = (state: State) => ({
-  refs: state.refs
+  refs: state.currentRepo ? state.currentRepo.refs : EMPTY_STATE
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({

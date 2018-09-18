@@ -2,11 +2,17 @@ import { CompareRefsResult, Repo } from "../github/loader";
 
 export interface State {
   repos: Loadable<ReposState>;
-  refs: Loadable<RefsState>;
+  currentRepo?: CurrentRepoState;
 }
 
 export interface ReposState {
   suggested: Repo[];
+}
+
+export interface CurrentRepoState {
+  owner: string;
+  repo: string;
+  refs: Loadable<RefsState>;
 }
 
 export interface RefsState {
@@ -46,6 +52,10 @@ export type Loadable<T, S = {}> = (
 export interface EmptyState {
   status: Empty;
 }
+
+export const EMPTY_STATE: EmptyState = {
+  status: "empty"
+};
 
 export interface LoadedState {
   status: Loaded;

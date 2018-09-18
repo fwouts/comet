@@ -43,11 +43,11 @@ export interface Repo {
 /**
  * Loads the list of refs (branches and tags).
  */
-export async function loadRefs(): Promise<Ref[]> {
+export async function loadRefs(owner: string, repo: string): Promise<Ref[]> {
   const refs: Ref[] = [];
   let branchesResponse = await octokit.repos.getBranches({
-    owner: config.OWNER,
-    repo: config.REPO
+    owner,
+    repo
   });
   refs.push(...extractBranches(branchesResponse.data));
   while (octokit.hasNextPage(branchesResponse as any)) {
@@ -55,8 +55,8 @@ export async function loadRefs(): Promise<Ref[]> {
     refs.push(...extractBranches(branchesResponse.data));
   }
   let tagsResponse = await octokit.repos.getTags({
-    owner: config.OWNER,
-    repo: config.REPO
+    owner,
+    repo
   });
   refs.push(...extractTags(tagsResponse.data));
   while (octokit.hasNextPage(tagsResponse as any)) {
@@ -90,19 +90,21 @@ function extractBranches(
  * Compares two refs.
  */
 export async function compareRefs(
+  owner: string,
+  repo: string,
   refName: string,
   compareToRefName: string
 ): Promise<CompareRefsResult> {
   const [comparisonOneWay, comparisonOtherWay] = await Promise.all([
     octokit.repos.compareCommits({
-      owner: config.OWNER,
-      repo: config.REPO,
+      owner,
+      repo,
       base: refName,
       head: compareToRefName
     }),
     octokit.repos.compareCommits({
-      owner: config.OWNER,
-      repo: config.REPO,
+      owner,
+      repo,
       base: compareToRefName,
       head: refName
     })
