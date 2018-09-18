@@ -7,7 +7,7 @@ import { Loadable, ReposState, State } from "../store/state";
 import Spinner from "./Spinner";
 
 const Container = styled.div`
-  background: red;
+  padding: 8px;
 `;
 
 class RepoPicker extends React.Component<{
@@ -26,6 +26,7 @@ class RepoPicker extends React.Component<{
     return (
       <Container>
         <Select
+          placeholder="Select a GitHub repo"
           options={options}
           isOptionSelected={option => option.value === this.props.currentRepo}
           onChange={option =>
