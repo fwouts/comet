@@ -12,24 +12,28 @@ octokit.authenticate({
  * Loads the list of suggested repos for the current user.
  */
 export async function loadSuggestedRepos(): Promise<Repo[]> {
-  const repos = [];
+  const repos: Repo[] = [];
   let reposResponse = await octokit.repos.getAll({
     per_page: 100,
     sort: "pushed"
   });
   repos.push(
-    ...reposResponse.data.map((repo: any) => ({
-      owner: repo.owner.login,
-      name: repo.name
-    }))
+    ...reposResponse.data.map(
+      (repo: any): Repo => ({
+        owner: repo.owner.login,
+        repo: repo.name
+      })
+    )
   );
   while (octokit.hasNextPage(reposResponse as any)) {
     reposResponse = await octokit.getNextPage(reposResponse as any);
     repos.push(
-      ...reposResponse.data.map((repo: any) => ({
-        owner: repo.owner.login,
-        name: repo.name
-      }))
+      ...reposResponse.data.map(
+        (repo: any): Repo => ({
+          owner: repo.owner.login,
+          repo: repo.name
+        })
+      )
     );
   }
   return repos;
