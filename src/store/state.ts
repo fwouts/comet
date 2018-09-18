@@ -1,4 +1,4 @@
-import { CompareRefsResult } from "../github/loader";
+import { CompareRefsResult, Repo } from "../github/loader";
 
 export type Loadable<T, S = {}> = (
   | LoadingState
@@ -19,7 +19,12 @@ export interface FailedState {
 }
 
 export interface State {
+  repos: Loadable<ReposState>;
   refs: Loadable<RefsState>;
+}
+
+export interface ReposState {
+  suggested: Repo[];
 }
 
 export interface RefsState {

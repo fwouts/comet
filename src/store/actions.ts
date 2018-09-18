@@ -1,13 +1,39 @@
 import * as redux from "redux";
-import { CommitsState, Loadable, RefsState } from "./state";
+import { CommitsState, Loadable, RefsState, ReposState } from "./state";
 
 export type Action =
+  | FetchReposAction
+  | UpdateReposAction
   | FetchRefsAction
   | UpdateRefsAction
   | SelectRefAction
   | FetchComparisonAction
   | UpdateComparisonAction;
 export type Dispatch = redux.Dispatch<Action>;
+
+export interface FetchReposAction {
+  type: "FETCH_REPOS";
+}
+
+export function fetchReposAction(): FetchReposAction {
+  return {
+    type: "FETCH_REPOS"
+  };
+}
+
+export interface UpdateReposAction {
+  type: "UPDATE_REPOS";
+  repos: Loadable<ReposState>;
+}
+
+export function updateReposAction(
+  repos: Loadable<ReposState>
+): UpdateReposAction {
+  return {
+    type: "UPDATE_REPOS",
+    repos
+  };
+}
 
 export interface FetchRefsAction {
   type: "FETCH_REFS";

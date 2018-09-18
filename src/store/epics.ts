@@ -6,16 +6,44 @@ import {
 } from "redux-observable";
 import { empty, from, Observable } from "rxjs";
 import { catchError, merge, mergeMap } from "rxjs/operators";
-import { compareRefs, loadRefs } from "../github/loader";
+import { compareRefs, loadRefs, loadSuggestedRepos } from "../github/loader";
 import {
   Action,
   FetchComparisonAction,
   fetchComparisonAction,
   SelectRefAction,
   updateComparisonAction,
-  updateRefsAction
+  updateRefsAction,
+  updateReposAction
 } from "./actions";
 import { State } from "./state";
+
+const fetchReposEpic = (
+  action$: ActionsObservable<Action>,
+  state$: StateObservable<State>
+): Observable<Action> =>
+  action$.pipe(
+    ofType("FETCH_REFS"),
+    mergeMap(fetchRepos)
+  );
+
+function fetchRepos(): Observable<Action> {
+  return from([updateReposAction({ status: "loading" })]).pipe(
+    merge(
+      from(loadSuggestedRepos()).pipe(
+        mergeMap(suggested =>
+          from([
+            updateReposAction({
+              status: "loaded",
+              suggested
+            })
+          ])
+        )
+      )
+    ),
+    catchError(error => from([updateReposAction({ status: "failed" })]))
+  );
+}
 
 const fetchRefsEpic = (
   action$: ActionsObservable<Action>,
@@ -113,6 +141,7 @@ function fetchComparison(
 }
 
 export const rootEpic = combineEpics(
+  fetchReposEpic,
   fetchRefsEpic,
   triggerFetchCommitsOnRefSelectEpic,
   fetchCommitsEpic

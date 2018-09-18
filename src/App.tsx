@@ -15,6 +15,7 @@ import {
   Dispatch,
   fetchComparisonAction,
   fetchRefsAction,
+  fetchReposAction,
   selectRefAction
 } from "./store/actions";
 import {
@@ -134,11 +135,13 @@ const Spinner = (
 
 class App extends React.Component<{
   refs: Loadable<RefsState>;
+  loadRepos(): void;
   loadRefs(): void;
   selectRef(refName: string): void;
   compareToAnotherRef(selectedRefName: string, compareToRefName: string): void;
 }> {
   public componentDidMount() {
+    this.props.loadRepos();
     this.props.loadRefs();
   }
 
@@ -277,6 +280,7 @@ const mapStateToProps = (state: State) => ({
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
+  loadRepos: () => dispatch(fetchReposAction()),
   loadRefs: () => dispatch(fetchRefsAction()),
   selectRef: (refName: string) => dispatch(selectRefAction(refName)),
   compareToAnotherRef: (selectedRefName: string, compareToRefName: string) =>

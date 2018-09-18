@@ -3,6 +3,9 @@ import { State } from "./state";
 
 export const rootReducer = (
   state: State = {
+    repos: {
+      status: "loading"
+    },
     refs: {
       status: "loading"
     }
@@ -10,6 +13,11 @@ export const rootReducer = (
   action: Action
 ): State => {
   switch (action.type) {
+    case "UPDATE_REPOS":
+      return {
+        ...state,
+        repos: action.repos
+      };
     case "UPDATE_REFS":
       return {
         ...state,

@@ -9,6 +9,38 @@ octokit.authenticate({
 });
 
 /**
+ * Loads the list of suggested repos for the current user.
+ */
+export async function loadSuggestedRepos(): Promise<Repo[]> {
+  const repos = [];
+  let reposResponse = await octokit.repos.getAll({
+    per_page: 100,
+    sort: "pushed"
+  });
+  repos.push(
+    ...reposResponse.data.map((repo: any) => ({
+      owner: repo.owner.login,
+      name: repo.name
+    }))
+  );
+  while (octokit.hasNextPage(reposResponse as any)) {
+    reposResponse = await octokit.getNextPage(reposResponse as any);
+    repos.push(
+      ...reposResponse.data.map((repo: any) => ({
+        owner: repo.owner.login,
+        name: repo.name
+      }))
+    );
+  }
+  return repos;
+}
+
+export interface Repo {
+  owner: string;
+  repo: string;
+}
+
+/**
  * Loads the list of refs (branches and tags).
  */
 export async function loadRefs(): Promise<Ref[]> {
