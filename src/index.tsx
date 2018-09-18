@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { applyMiddleware, compose, createStore } from "redux";
 import { createEpicMiddleware } from "redux-observable";
-import App from "./App";
+import App from "./components/App";
 import "./index.css";
 import registerServiceWorker from "./registerServiceWorker";
 import { Action } from "./store/actions";
