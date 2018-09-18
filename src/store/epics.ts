@@ -23,7 +23,7 @@ const fetchReposEpic = (
   state$: StateObservable<State>
 ): Observable<Action> =>
   action$.pipe(
-    ofType("FETCH_REFS"),
+    ofType("FETCH_REPOS"),
     mergeMap(fetchRepos)
   );
 
