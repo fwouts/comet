@@ -1,28 +1,5 @@
 import { CompareRefsResult, Repo } from "../github/loader";
 
-export type Loadable<T, S = {}> = (
-  | EmptyState
-  | LoadingState
-  | (LoadedState & T)
-  | FailedState) &
-  S;
-
-export interface EmptyState {
-  status: Empty;
-}
-
-export interface LoadedState {
-  status: Loaded;
-}
-
-export interface LoadingState {
-  status: Loading;
-}
-
-export interface FailedState {
-  status: Failed;
-}
-
 export interface State {
   repos: Loadable<ReposState>;
   refs: Loadable<RefsState>;
@@ -58,6 +35,29 @@ export type CommitsState = Loadable<
     compareToRefName: string;
   }
 >;
+
+export type Loadable<T, S = {}> = (
+  | EmptyState
+  | LoadingState
+  | (LoadedState & T)
+  | FailedState) &
+  S;
+
+export interface EmptyState {
+  status: Empty;
+}
+
+export interface LoadedState {
+  status: Loaded;
+}
+
+export interface LoadingState {
+  status: Loading;
+}
+
+export interface FailedState {
+  status: Failed;
+}
 
 export type Empty = "empty";
 
