@@ -1,7 +1,7 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import styled from "styled-components";
-import { Dispatch, fetchRefsAction } from "../store/actions";
+import { Dispatch } from "../store/actions";
 import { CommitsState, State } from "../store/state";
 import Comparison from "./Comparison";
 import RefList from "./RefList";
@@ -16,20 +16,13 @@ const RootContainer = styled.div`
 
 class CurrentRepo extends React.Component<{
   comparison?: CommitsState;
-  loadRefs(): void;
 }> {
-  public componentDidMount() {
-    this.props.loadRefs();
-  }
-
-  public render() {
-    return (
-      <RootContainer>
-        <RefList />
-        {this.props.comparison && <Comparison />}
-      </RootContainer>
-    );
-  }
+  public render = () => (
+    <RootContainer>
+      <RefList />
+      {this.props.comparison && <Comparison />}
+    </RootContainer>
+  );
 }
 
 const mapStateToProps = (state: State) => ({
@@ -39,9 +32,7 @@ const mapStateToProps = (state: State) => ({
       : undefined
 });
 
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  loadRefs: () => dispatch(fetchRefsAction())
-});
+const mapDispatchToProps = (dispatch: Dispatch) => ({});
 
 export default connect(
   mapStateToProps,

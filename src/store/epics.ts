@@ -11,7 +11,9 @@ import {
   Action,
   FetchComparisonAction,
   fetchComparisonAction,
+  fetchRefsAction,
   SelectRefAction,
+  SelectRepoAction,
   updateComparisonAction,
   updateRefsAction,
   updateReposAction
@@ -44,6 +46,17 @@ function fetchRepos(): Observable<Action> {
     catchError(error => from([updateReposAction({ status: "failed" })]))
   );
 }
+
+const triggerFetchRefsOnRepoSelectEpic = (
+  action$: ActionsObservable<Action>,
+  state$: StateObservable<State>
+): Observable<Action> =>
+  action$.pipe(
+    ofType("SELECT_REPO"),
+    mergeMap((action: SelectRepoAction) => {
+      return from([fetchRefsAction(action.owner, action.repo)]);
+    })
+  );
 
 const fetchRefsEpic = (
   action$: ActionsObservable<Action>,
@@ -161,6 +174,7 @@ function fetchComparison(
 
 export const rootEpic = combineEpics(
   fetchReposEpic,
+  triggerFetchRefsOnRepoSelectEpic,
   fetchRefsEpic,
   triggerFetchCommitsOnRefSelectEpic,
   fetchCommitsEpic

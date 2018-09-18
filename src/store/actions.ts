@@ -4,6 +4,7 @@ import { CommitsState, Loadable, RefsState, ReposState } from "./state";
 export type Action =
   | FetchReposAction
   | UpdateReposAction
+  | SelectRepoAction
   | FetchRefsAction
   | UpdateRefsAction
   | SelectRefAction
@@ -35,13 +36,34 @@ export function updateReposAction(
   };
 }
 
-export interface FetchRefsAction {
-  type: "FETCH_REFS";
+export interface SelectRepoAction {
+  type: "SELECT_REPO";
+  owner: string;
+  repo: string;
 }
 
-export function fetchRefsAction(): FetchRefsAction {
+export function selectRepoAction(
+  owner: string,
+  repo: string
+): SelectRepoAction {
   return {
-    type: "FETCH_REFS"
+    type: "SELECT_REPO",
+    owner,
+    repo
+  };
+}
+
+export interface FetchRefsAction {
+  type: "FETCH_REFS";
+  owner: string;
+  repo: string;
+}
+
+export function fetchRefsAction(owner: string, repo: string): FetchRefsAction {
+  return {
+    type: "FETCH_REFS",
+    owner,
+    repo
   };
 }
 

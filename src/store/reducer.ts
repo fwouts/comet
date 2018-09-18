@@ -1,15 +1,9 @@
-import { OWNER, REPO } from "../config";
 import { Action } from "./actions";
 import { EMPTY_STATE, State } from "./state";
 
 export const rootReducer = (
   state: State = {
-    repos: EMPTY_STATE,
-    currentRepo: {
-      owner: OWNER,
-      repo: REPO,
-      refs: EMPTY_STATE
-    }
+    repos: EMPTY_STATE
   },
   action: Action
 ): State => {
@@ -18,6 +12,15 @@ export const rootReducer = (
       return {
         ...state,
         repos: action.repos
+      };
+    case "SELECT_REPO":
+      return {
+        ...state,
+        currentRepo: {
+          owner: action.owner,
+          repo: action.repo,
+          refs: EMPTY_STATE
+        }
       };
     case "UPDATE_REFS":
       if (!state.currentRepo) {
