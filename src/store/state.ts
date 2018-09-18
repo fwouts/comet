@@ -1,44 +1,44 @@
 import { CompareRefsResult, Repo } from "../github/loader";
 
 export interface State {
-  repos: Loadable<ReposState>;
-  currentRepo?: CurrentRepoState;
+  readonly repos: Loadable<ReposState>;
+  readonly currentRepo?: CurrentRepoState;
 }
 
 export interface ReposState {
-  suggested: Repo[];
+  readonly suggested: Repo[];
 }
 
 export interface CurrentRepoState {
-  owner: string;
-  repo: string;
-  refs: Loadable<RefsState>;
+  readonly owner: string;
+  readonly repo: string;
+  readonly refs: Loadable<RefsState>;
 }
 
 export interface RefsState {
-  refs: Ref[];
-  selectedRefName?: string;
-  comparison?: CommitsState;
+  readonly refs: Ref[];
+  readonly selectedRefName?: string;
+  readonly comparison?: CommitsState;
 }
 
 export type Ref = Branch | Tag;
 
 export interface Branch {
-  kind: "branch";
-  name: string;
+  readonly kind: "branch";
+  readonly name: string;
 }
 
 export interface Tag {
-  kind: "tag";
-  name: string;
+  readonly kind: "tag";
+  readonly name: string;
 }
 
 export type CommitsState = Loadable<
   {
-    result: CompareRefsResult;
+    readonly result: CompareRefsResult;
   },
   {
-    compareToRefName: string;
+    readonly compareToRefName: string;
   }
 >;
 
@@ -50,7 +50,7 @@ export type Loadable<T, S = {}> = (
   S;
 
 export interface EmptyState {
-  status: Empty;
+  readonly status: Empty;
 }
 
 export const EMPTY_STATE: EmptyState = {
@@ -58,15 +58,15 @@ export const EMPTY_STATE: EmptyState = {
 };
 
 export interface LoadedState {
-  status: Loaded;
+  readonly status: Loaded;
 }
 
 export interface LoadingState {
-  status: Loading;
+  readonly status: Loading;
 }
 
 export interface FailedState {
-  status: Failed;
+  readonly status: Failed;
 }
 
 export type Empty = "empty";
