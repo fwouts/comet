@@ -1,6 +1,9 @@
 import axios from "axios";
 import { JIRA_EMAIL, JIRA_PASSWORD, JIRA_PROXIED_HOST } from "../config";
 
+// Jira status names that should be considered as "Done".
+export const SPECIAL_DONE_STATUSES = new Set(["Ready for Deploy"]);
+
 export interface JiraTicket {
   status: {
     name: string;

@@ -8,6 +8,7 @@ import styled from "styled-components";
 import { JIRA_HOST } from "../config";
 import { Commit, CompareRefsResult } from "../github/loader";
 import { extractJiraKey } from "../jira/key";
+import { SPECIAL_DONE_STATUSES } from "../jira/loader";
 import { Dispatch, fetchComparisonAction } from "../store/actions";
 import {
   CommitsState,
@@ -221,7 +222,11 @@ function jiraTicketForCommit(
     const jiraTicket = jiraTicketsState.jiraTickets[jiraKey];
     let isDone = false;
     const lastCommit = jiraTicket.commits[0];
-    if (jiraTicket.status.categoryKey === "done" && lastCommit) {
+    if (
+      (jiraTicket.status.categoryKey === "done" ||
+        SPECIAL_DONE_STATUSES.has(jiraTicket.status.name)) &&
+      lastCommit
+    ) {
       // The ticket is only done if the last commit is included in this comparison.
       isDone = allCommits.findIndex(c => c.sha === lastCommit.id) !== -1;
     }
