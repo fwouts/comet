@@ -196,12 +196,16 @@ const fetchJiraTicketsEpic = (
   );
 
 function fetchJiraTickets(commits: Commit[]): Observable<Action> {
-  return from([updateJiraTicketsAction({ status: "loading" })]).pipe(
+  return from([
+    updateJiraTicketsAction(commits, {
+      status: "loading"
+    })
+  ]).pipe(
     merge(
       from(loadJiraTickets(commits)).pipe(
         mergeMap(jiraTickets =>
           from([
-            updateJiraTicketsAction({
+            updateJiraTicketsAction(commits, {
               status: "loaded",
               jiraTickets
             })
@@ -211,7 +215,7 @@ function fetchJiraTickets(commits: Commit[]): Observable<Action> {
     ),
     catchError(error =>
       from([
-        updateJiraTicketsAction({
+        updateJiraTicketsAction(commits, {
           status: "failed"
         })
       ])

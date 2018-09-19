@@ -1,9 +1,9 @@
 import produce from "immer";
+import { isEqual } from "lodash";
 import { Action } from "./actions";
 import {
   CurrentRepoState,
   EMPTY_STATE,
-  JiraTicketsState,
   Loadable,
   RefsState,
   ReposState,
@@ -77,29 +77,18 @@ const refsReducer = (
           draft.comparison = action.comparison;
         }
       });
-    default:
-      if (refsState.status === "loaded") {
-        return produce(refsState, draft => {
-          if (draft.comparison && draft.comparison.status === "loaded") {
-            draft.comparison.jiraTickets = jiraTicketsReducer(
-              draft.comparison.jiraTickets,
-              action
-            );
-          }
-        });
-      }
-      return refsState;
-  }
-};
-
-const jiraTicketsReducer = (
-  jiraTicketsState: Loadable<JiraTicketsState>,
-  action: Action
-): Loadable<JiraTicketsState> => {
-  switch (action.type) {
     case "UPDATE_JIRA_TICKETS":
-      return action.jiraTickets;
+      return produce(refsState, draft => {
+        if (
+          draft.status === "loaded" &&
+          draft.comparison &&
+          draft.comparison.status === "loaded" &&
+          isEqual(draft.comparison.result.addedCommits, action.commits)
+        ) {
+          draft.comparison.jiraTickets = action.jiraTickets;
+        }
+      });
     default:
-      return jiraTicketsState;
+      return refsState;
   }
 };

@@ -150,14 +150,17 @@ export function fetchJiraTicketsAction(
 
 export interface UpdateJiraTicketsAction {
   type: "UPDATE_JIRA_TICKETS";
+  commits: Commit[];
   jiraTickets: Loadable<JiraTicketsState>;
 }
 
 export function updateJiraTicketsAction(
+  commits: Commit[],
   jiraTickets: Loadable<JiraTicketsState>
 ): UpdateJiraTicketsAction {
   return {
     type: "UPDATE_JIRA_TICKETS",
+    commits,
     jiraTickets
   };
 }
