@@ -3,10 +3,19 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as React from "react";
 import { connect } from "react-redux";
 import Select from "react-select";
+import { ClipLoader } from "react-spinners";
 import styled from "styled-components";
+import { JIRA_HOST } from "../config";
 import { Commit, CompareRefsResult } from "../github/loader";
+import { extractJiraKey } from "../jira/key";
 import { Dispatch, fetchComparisonAction } from "../store/actions";
-import { CommitsState, Ref, State } from "../store/state";
+import {
+  CommitsState,
+  JiraTicketsState,
+  Loadable,
+  Ref,
+  State
+} from "../store/state";
 import Spinner from "./Spinner";
 
 const Container = styled.div`
@@ -68,6 +77,15 @@ const CommitSha = styled.a`
   }
 `;
 
+const JiraTicket = styled.a<{ backgroundColor: string; loading?: boolean }>`
+  background: ${props => props.backgroundColor};
+  color: ${props => (props.loading ? "#333" : "#fff")};
+  margin-left: 16px;
+  padding: 4px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+`;
+
 class Comparison extends React.Component<{
   refs: Ref[];
   selectedRefName: string;
@@ -125,7 +143,10 @@ class Comparison extends React.Component<{
               )}
             </Description>
             <CommitList>
-              {this.renderComparisonList(this.props.comparison.result)}
+              {this.renderComparisonList(
+                this.props.comparison.result,
+                this.props.comparison.jiraTickets
+              )}
             </CommitList>
           </>
         )}
@@ -134,7 +155,10 @@ class Comparison extends React.Component<{
     );
   }
 
-  private renderComparisonList(comparison: CompareRefsResult) {
+  private renderComparisonList(
+    comparison: CompareRefsResult,
+    jiraTickets: Loadable<JiraTicketsState>
+  ) {
     return (
       <>
         {comparison.addedCommits.map(commit => (
@@ -142,6 +166,7 @@ class Comparison extends React.Component<{
             <FontAwesomeIcon icon={faArrowAltCircleRight} color="green" />
             {commitSha(commit)}
             {firstLine(commit.commit.message)}
+            {jiraTicketForCommit(comparison.addedCommits, commit, jiraTickets)}
           </CommitItem>
         ))}
         {comparison.removedCommits.map(commit => (
@@ -169,6 +194,52 @@ function commitSha(commit: Commit) {
       </CommitSha>{" "}
     </>
   );
+}
+
+function jiraTicketForCommit(
+  allCommits: Commit[],
+  commit: Commit,
+  jiraTicketsState: Loadable<JiraTicketsState>
+) {
+  const jiraKey = extractJiraKey(commit.commit.message);
+  if (!jiraKey) {
+    return <></>;
+  }
+  if (jiraTicketsState.status !== "loaded") {
+    return (
+      <JiraTicket
+        href={jiraLink(jiraKey)}
+        target="_blank"
+        backgroundColor="#eee"
+        loading={true}
+      >
+        {jiraKey} <ClipLoader size={12} />
+      </JiraTicket>
+    );
+  }
+  if (jiraKey && jiraTicketsState.jiraTickets[jiraKey]) {
+    const jiraTicket = jiraTicketsState.jiraTickets[jiraKey];
+    let isDone = false;
+    const lastCommit = jiraTicket.commits[0];
+    if (jiraTicket.status.categoryKey === "done" && lastCommit) {
+      // The ticket is only done if the last commit is included in this comparison.
+      isDone = allCommits.findIndex(c => c.sha === lastCommit.id) !== -1;
+    }
+    return (
+      <JiraTicket
+        href={jiraLink(jiraKey)}
+        target="_blank"
+        backgroundColor={isDone ? "#2b2" : "#ccc"}
+      >
+        {jiraKey} {isDone ? "✓" : " (incomplete)"}
+      </JiraTicket>
+    );
+  }
+  return <></>;
+}
+
+function jiraLink(jiraKey: string) {
+  return `${JIRA_HOST}/browse/${jiraKey}`;
 }
 
 const mapStateToProps = (state: State) => {

@@ -3,6 +3,7 @@ import { Action } from "./actions";
 import {
   CurrentRepoState,
   EMPTY_STATE,
+  JiraTicketsState,
   Loadable,
   RefsState,
   ReposState,
@@ -77,6 +78,28 @@ const refsReducer = (
         }
       });
     default:
+      if (refsState.status === "loaded") {
+        return produce(refsState, draft => {
+          if (draft.comparison && draft.comparison.status === "loaded") {
+            draft.comparison.jiraTickets = jiraTicketsReducer(
+              draft.comparison.jiraTickets,
+              action
+            );
+          }
+        });
+      }
       return refsState;
+  }
+};
+
+const jiraTicketsReducer = (
+  jiraTicketsState: Loadable<JiraTicketsState>,
+  action: Action
+): Loadable<JiraTicketsState> => {
+  switch (action.type) {
+    case "UPDATE_JIRA_TICKETS":
+      return action.jiraTickets;
+    default:
+      return jiraTicketsState;
   }
 };

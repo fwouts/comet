@@ -1,4 +1,5 @@
 import { CompareRefsResult, Repo } from "../github/loader";
+import { JiraTicket } from "../jira/loader";
 
 export interface State {
   readonly repos: Loadable<ReposState>;
@@ -36,11 +37,18 @@ export interface Tag {
 export type CommitsState = Loadable<
   {
     readonly result: CompareRefsResult;
+    readonly jiraTickets: Loadable<JiraTicketsState>;
   },
   {
     readonly compareToRefName: string;
   }
 >;
+
+export interface JiraTicketsState {
+  jiraTickets: {
+    [jiraKey: string]: JiraTicket;
+  };
+}
 
 export type Loadable<T, S = {}> = (
   | EmptyState

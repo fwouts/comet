@@ -6,19 +6,29 @@ import {
 } from "redux-observable";
 import { empty, from, Observable } from "rxjs";
 import { catchError, merge, mergeMap } from "rxjs/operators";
-import { compareRefs, loadRefs, loadSuggestedRepos } from "../github/loader";
+import {
+  Commit,
+  compareRefs,
+  loadRefs,
+  loadSuggestedRepos
+} from "../github/loader";
+import { extractJiraKey } from "../jira/key";
+import { JiraTicket, loadTickets } from "../jira/loader";
 import {
   Action,
   FetchComparisonAction,
   fetchComparisonAction,
+  FetchJiraTicketsAction,
+  fetchJiraTicketsAction,
   fetchRefsAction,
   SelectRefAction,
   SelectRepoAction,
   updateComparisonAction,
+  updateJiraTicketsAction,
   updateRefsAction,
   updateReposAction
 } from "./actions";
-import { State } from "./state";
+import { EMPTY_STATE, State } from "./state";
 
 const fetchReposEpic = (
   action$: ActionsObservable<Action>,
@@ -155,8 +165,10 @@ function fetchComparison(
             updateComparisonAction(refName, {
               status: "loaded",
               compareToRefName,
-              result: comparison
-            })
+              result: comparison,
+              jiraTickets: EMPTY_STATE
+            }),
+            fetchJiraTicketsAction(comparison.addedCommits)
           ])
         )
       )
@@ -172,10 +184,56 @@ function fetchComparison(
   );
 }
 
+const fetchJiraTicketsEpic = (
+  action$: ActionsObservable<Action>,
+  state$: StateObservable<State>
+): Observable<Action> =>
+  action$.pipe(
+    ofType("FETCH_JIRA_TICKETS"),
+    mergeMap((action: FetchJiraTicketsAction) =>
+      fetchJiraTickets(action.commits)
+    )
+  );
+
+function fetchJiraTickets(commits: Commit[]): Observable<Action> {
+  return from([updateJiraTicketsAction({ status: "loading" })]).pipe(
+    merge(
+      from(loadJiraTickets(commits)).pipe(
+        mergeMap(jiraTickets =>
+          from([
+            updateJiraTicketsAction({
+              status: "loaded",
+              jiraTickets
+            })
+          ])
+        )
+      )
+    ),
+    catchError(error =>
+      from([
+        updateJiraTicketsAction({
+          status: "failed"
+        })
+      ])
+    )
+  );
+}
+
+async function loadJiraTickets(
+  commits: Commit[]
+): Promise<{ [jiraKey: string]: JiraTicket }> {
+  const jiraKeys = commits.map(commit => extractJiraKey(commit.commit.message));
+  const uniqueJiraKeys = new Set(jiraKeys.filter(k => k !== null)) as Set<
+    string
+  >;
+  return loadTickets(Array.from(uniqueJiraKeys));
+}
+
 export const rootEpic = combineEpics(
   fetchReposEpic,
   triggerFetchRefsOnRepoSelectEpic,
   fetchRefsEpic,
   triggerFetchCommitsOnRefSelectEpic,
-  fetchCommitsEpic
+  fetchCommitsEpic,
+  fetchJiraTicketsEpic
 );

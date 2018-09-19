@@ -1,5 +1,12 @@
 import * as redux from "redux";
-import { CommitsState, Loadable, RefsState, ReposState } from "./state";
+import { Commit } from "../github/loader";
+import {
+  CommitsState,
+  JiraTicketsState,
+  Loadable,
+  RefsState,
+  ReposState
+} from "./state";
 
 export type Action =
   | FetchReposAction
@@ -9,7 +16,9 @@ export type Action =
   | UpdateRefsAction
   | SelectRefAction
   | FetchComparisonAction
-  | UpdateComparisonAction;
+  | UpdateComparisonAction
+  | FetchJiraTicketsAction
+  | UpdateJiraTicketsAction;
 export type Dispatch = redux.Dispatch<Action>;
 
 export interface FetchReposAction {
@@ -122,5 +131,33 @@ export function updateComparisonAction(
     type: "UPDATE_COMPARISON",
     refName,
     comparison
+  };
+}
+
+export interface FetchJiraTicketsAction {
+  type: "FETCH_JIRA_TICKETS";
+  commits: Commit[];
+}
+
+export function fetchJiraTicketsAction(
+  commits: Commit[]
+): FetchJiraTicketsAction {
+  return {
+    type: "FETCH_JIRA_TICKETS",
+    commits
+  };
+}
+
+export interface UpdateJiraTicketsAction {
+  type: "UPDATE_JIRA_TICKETS";
+  jiraTickets: Loadable<JiraTicketsState>;
+}
+
+export function updateJiraTicketsAction(
+  jiraTickets: Loadable<JiraTicketsState>
+): UpdateJiraTicketsAction {
+  return {
+    type: "UPDATE_JIRA_TICKETS",
+    jiraTickets
   };
 }
