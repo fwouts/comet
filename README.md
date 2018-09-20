@@ -1,4 +1,4 @@
-# Release manager
+# Comet
 
 This is a dashboard to easily compare branches and tags for any GitHub repository.
 
@@ -13,8 +13,8 @@ Follow the [official instructions](https://yarnpkg.com/en/docs/install).
 ### 2. Clone the repository
 
 ```
-git clone https://github.com/zenclabs/release-manager.git
-cd release-manager
+git clone https://github.com/zenclabs/comet.git
+cd comet
 yarn install
 ```
 
@@ -39,4 +39,4 @@ export const REPO = "react";
 yarn start
 ```
 
-The release manager will then be available at http://localhost:3000.
+Comet will then be available at http://localhost:3000.
