@@ -26,11 +26,20 @@ Your config file will contain three constants:
 // Token generated from https://github.com/settings/tokens with the "repo" permission.
 export const GITHUB_TOKEN = "=.......................";
 
-// Organisation or user who owns the GitHub repository.
-export const OWNER = "facebook";
+// If you'd like to automatically see the status of associated Jira tickets, add the following constants (optional):
 
-// Name of the GitHub repository.
-export const REPO = "react";
+// Jira host (example below if you use Jira Cloud).
+export const JIRA_HOST = "https://[jira-project].atlassian.net";
+
+// If you use Jira Cloud, you'll need to set up a proxy, started with `yarn jira-proxy`.
+// Upvote https://jira.atlassian.com/browse/JRACLOUD-30371 if you'd like this fixed.
+export const JIRA_PROXIED_HOST = "http://localhost:3001";
+
+// Your Jira email account.
+export const JIRA_EMAIL = "you@domain.com";
+
+// A Jira API token. See https://confluence.atlassian.com/cloud/api-tokens-938839638.html.
+export const JIRA_API_TOKEN = "............";
 ```
 
 ### 4. Start the local server

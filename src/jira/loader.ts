@@ -1,5 +1,5 @@
 import axios from "axios";
-import { JIRA_EMAIL, JIRA_PASSWORD, JIRA_PROXIED_HOST } from "../config";
+import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "./config";
 
 // Jira status names that should be considered as "Done".
 export const SPECIAL_DONE_STATUSES = new Set(["Ready for Deploy"]);
@@ -34,11 +34,16 @@ export async function loadTickets(
 }
 
 export async function loadTicket(jiraKey: string): Promise<JiraTicket> {
+  if (!jiraConfig) {
+    throw new Error(HELPFUL_JIRA_ERROR_MESSAGE);
+  }
   const headers = {
-    Authorization: `Basic ${btoa(`${JIRA_EMAIL}:${JIRA_PASSWORD}`)}`
+    Authorization: `Basic ${btoa(
+      `${jiraConfig.JIRA_EMAIL}:${jiraConfig.JIRA_API_TOKEN}`
+    )}`
   };
   const getIssueResponse = await axios.get(
-    `${JIRA_PROXIED_HOST}/rest/api/3/issue/${jiraKey}`,
+    `${jiraConfig.JIRA_PROXIED_HOST}/rest/api/3/issue/${jiraKey}`,
     {
       headers
     }
@@ -46,7 +51,9 @@ export async function loadTicket(jiraKey: string): Promise<JiraTicket> {
   const getIssueData = getIssueResponse.data as GetIssueResponse;
   const issueId = getIssueResponse.data.id;
   const getCommitsResponse = await axios.get(
-    `${JIRA_PROXIED_HOST}/rest/dev-status/1.0/issue/detail?issueId=${issueId}&applicationType=github&dataType=repository`,
+    `${
+      jiraConfig.JIRA_PROXIED_HOST
+    }/rest/dev-status/1.0/issue/detail?issueId=${issueId}&applicationType=github&dataType=repository`,
     {
       headers
     }

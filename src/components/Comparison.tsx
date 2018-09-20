@@ -5,8 +5,8 @@ import { connect } from "react-redux";
 import Select from "react-select";
 import { ClipLoader } from "react-spinners";
 import styled from "styled-components";
-import { JIRA_HOST } from "../config";
 import { Commit, CompareRefsResult } from "../github/loader";
+import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "../jira/config";
 import { extractJiraKey } from "../jira/key";
 import { SPECIAL_DONE_STATUSES } from "../jira/loader";
 import { Dispatch, fetchComparisonAction } from "../store/actions";
@@ -202,6 +202,9 @@ function jiraTicketForCommit(
   commit: Commit,
   jiraTicketsState: Loadable<JiraTicketsState>
 ) {
+  if (!jiraConfig) {
+    return <></>
+  }
   const jiraKey = extractJiraKey(commit.commit.message);
   if (!jiraKey) {
     return <></>;
@@ -244,7 +247,10 @@ function jiraTicketForCommit(
 }
 
 function jiraLink(jiraKey: string) {
-  return `${JIRA_HOST}/browse/${jiraKey}`;
+  if (!jiraConfig) {
+    throw new Error(HELPFUL_JIRA_ERROR_MESSAGE);
+  }
+  return `${jiraConfig.JIRA_HOST}/browse/${jiraKey}`;
 }
 
 const mapStateToProps = (state: State) => {
