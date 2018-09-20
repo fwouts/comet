@@ -20,14 +20,16 @@ yarn install
 
 ### 3. Create a file called `src/config.ts`
 
-Your config file will contain three constants:
+Your config file will contain your GitHub API token, generated from
+https://github.com/settings/tokens with the "repo" permission
 
 ```
-// Token generated from https://github.com/settings/tokens with the "repo" permission.
 export const GITHUB_TOKEN = "=.......................";
+```
 
-// If you'd like to automatically see the status of associated Jira tickets, add the following constants (optional):
+If you'd like to automatically see the status of associated Jira tickets, add the following constants (optional):
 
+```
 // Jira host (example below if you use Jira Cloud).
 export const JIRA_HOST = "https://[jira-project].atlassian.net";
 
