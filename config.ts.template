@@ -1,0 +1,5 @@
+export const GITHUB_TOKEN = "$GITHUB_TOKEN";
+export const JIRA_HOST = "$JIRA_HOST";
+export const JIRA_PROXIED_HOST = "/jira";
+export const JIRA_EMAIL = "$JIRA_EMAIL";
+export const JIRA_API_TOKEN = "$JIRA_API_TOKEN";
