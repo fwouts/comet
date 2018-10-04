@@ -1,6 +1,11 @@
 import { push, RouterAction } from "connected-react-router";
-import { ActionsObservable, combineEpics, ofType } from "redux-observable";
-import { from, Observable, of } from "rxjs";
+import {
+  ActionsObservable,
+  combineEpics,
+  ofType,
+  StateObservable
+} from "redux-observable";
+import { empty, from, Observable, of } from "rxjs";
 import { catchError, merge, mergeMap } from "rxjs/operators";
 import {
   Commit,
@@ -26,7 +31,7 @@ import {
   UpdateSelectedRefAction,
   UpdateSelectedRepoAction
 } from "./actions";
-import { EMPTY_STATE } from "./state";
+import { CurrentRepoState, EMPTY_STATE, State } from "./state";
 
 const fetchReposEpic = (
   action$: ActionsObservable<Action>
@@ -75,16 +80,29 @@ const triggerFetchRefsOnRepoUpdatedEpic = (
   );
 
 const fetchRefsEpic = (
-  action$: ActionsObservable<Action>
+  action$: ActionsObservable<Action>,
+  state$: StateObservable<State>
 ): Observable<Action> =>
   action$.pipe(
     ofType("FETCH_REFS"),
     mergeMap((action: FetchRefsAction) => {
-      return fetchRefs(action.owner, action.repo);
+      return fetchRefs(action.owner, action.repo, state$.value.currentRepo);
     })
   );
 
-function fetchRefs(owner: string, repo: string): Observable<Action> {
+function fetchRefs(
+  owner: string,
+  repo: string,
+  currentRepo?: CurrentRepoState
+): Observable<Action> {
+  if (currentRepo && currentRepo.owner === owner && currentRepo.repo === repo) {
+    if (
+      currentRepo.refs.status === "loading" ||
+      currentRepo.refs.status === "loaded"
+    ) {
+      return empty();
+    }
+  }
   return from([updateRefsAction({ status: "loading" })]).pipe(
     merge(
       from(loadRefs(owner, repo)).pipe(
