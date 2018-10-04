@@ -232,7 +232,7 @@ function author(commit: Commit) {
   return (
     <Author>
       {commit.commit.author.name}
-      <Avatar src={commit.author.avatar_url} />
+      {commit.author && <Avatar src={commit.author.avatar_url} />}
     </Author>
   );
 }

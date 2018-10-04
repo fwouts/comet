@@ -147,6 +147,6 @@ export interface Commit {
   author: {
     login: string;
     avatar_url: string;
-  };
+  } | null;
   html_url: string;
 }
