@@ -77,6 +77,7 @@ const CommitSha = styled.a`
   font-size: 0.9em;
   display: block;
   margin: 0 8px;
+  user-select: none;
 
   &&:hover {
     color: #777;
@@ -89,6 +90,7 @@ const CommitMessage = styled.div`
 `;
 
 const JiraTicket = styled.a<{ backgroundColor: string; loading?: boolean }>`
+  user-select: none;
   background: ${props => props.backgroundColor};
   color: #333;
   margin: 0 8px;
@@ -101,6 +103,7 @@ const Author = styled.div`
   display: flex;
   flex-direction: row;
   align-items: center;
+  user-select: none;
 `;
 
 const AuthorName = styled.span`
