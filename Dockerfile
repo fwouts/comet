@@ -12,6 +12,7 @@ ENV JIRA_HOST=${JIRA_HOST}
 ENV JIRA_EMAIL=${JIRA_EMAIL}
 ENV JIRA_API_TOKEN=${JIRA_API_TOKEN}
 RUN envsubst < config.ts.template > /comet-build/src/config.ts
+RUN yarn install
 RUN yarn build
 
 # Serve it from Nginx.
