@@ -1,11 +1,6 @@
 import { push, RouterAction } from "connected-react-router";
-import {
-  ActionsObservable,
-  combineEpics,
-  ofType,
-  StateObservable
-} from "redux-observable";
-import { empty, from, Observable, of } from "rxjs";
+import { ActionsObservable, combineEpics, ofType } from "redux-observable";
+import { from, Observable, of } from "rxjs";
 import { catchError, merge, mergeMap } from "rxjs/operators";
 import {
   Commit,
@@ -18,24 +13,23 @@ import { JiraTicket, loadTickets } from "../jira/loader";
 import { producePath } from "../routing";
 import {
   Action,
-  FetchComparisonAction,
-  fetchComparisonAction,
   FetchJiraTicketsAction,
   fetchJiraTicketsAction,
   fetchRefsAction,
+  FetchRefsAction,
+  NavigateToRefAction,
   NavigateToRepoAction,
-  SelectRefAction,
   updateComparisonAction,
   updateJiraTicketsAction,
   updateRefsAction,
   updateReposAction,
+  UpdateSelectedRefAction,
   UpdateSelectedRepoAction
 } from "./actions";
-import { EMPTY_STATE, State } from "./state";
+import { EMPTY_STATE } from "./state";
 
 const fetchReposEpic = (
-  action$: ActionsObservable<Action>,
-  state$: StateObservable<State>
+  action$: ActionsObservable<Action>
 ): Observable<Action> =>
   action$.pipe(
     ofType("FETCH_REPOS"),
@@ -61,8 +55,7 @@ function fetchRepos(): Observable<Action> {
 }
 
 const navigateToRepoEpic = (
-  action$: ActionsObservable<Action>,
-  state$: StateObservable<State>
+  action$: ActionsObservable<Action>
 ): Observable<RouterAction> =>
   action$.pipe(
     ofType("NAVIGATE_TO_REPO"),
@@ -72,8 +65,7 @@ const navigateToRepoEpic = (
   );
 
 const triggerFetchRefsOnRepoUpdatedEpic = (
-  action$: ActionsObservable<Action>,
-  state$: StateObservable<State>
+  action$: ActionsObservable<Action>
 ): Observable<Action> =>
   action$.pipe(
     ofType("UPDATE_SELECTED_REPO"),
@@ -83,17 +75,12 @@ const triggerFetchRefsOnRepoUpdatedEpic = (
   );
 
 const fetchRefsEpic = (
-  action$: ActionsObservable<Action>,
-  state$: StateObservable<State>
+  action$: ActionsObservable<Action>
 ): Observable<Action> =>
   action$.pipe(
     ofType("FETCH_REFS"),
-    mergeMap(() => {
-      const currentRepo = state$.value.currentRepo;
-      if (!currentRepo) {
-        return empty();
-      }
-      return fetchRefs(currentRepo.owner, currentRepo.repo);
+    mergeMap((action: FetchRefsAction) => {
+      return fetchRefs(action.owner, action.repo);
     })
   );
 
@@ -115,47 +102,34 @@ function fetchRefs(owner: string, repo: string): Observable<Action> {
   );
 }
 
-const triggerFetchCommitsOnRefSelectEpic = (
-  action$: ActionsObservable<Action>,
-  state$: StateObservable<State>
-): Observable<Action> =>
+const navigateToRefEpic = (
+  action$: ActionsObservable<Action>
+): Observable<RouterAction> =>
   action$.pipe(
-    ofType("SELECT_REF"),
-    mergeMap((action: SelectRefAction) => {
-      if (
-        !state$.value.currentRepo ||
-        state$.value.currentRepo.refs.status !== "loaded" ||
-        !state$.value.currentRepo.refs.selectedRefName
-      ) {
-        return empty();
-      }
-      const refIndex = state$.value.currentRepo.refs.refs.findIndex(
-        r => r.name === action.refName
+    ofType("NAVIGATE_TO_REF"),
+    mergeMap((action: NavigateToRefAction) => {
+      return of(
+        push(
+          producePath(
+            action.owner,
+            action.repo,
+            action.refName,
+            action.compareToRefName
+          )
+        )
       );
-      if (refIndex === state$.value.currentRepo.refs.refs.length - 1) {
-        // Unfortunately we don't have any previous ref to compare to.
-        return empty();
-      }
-      const compareToRefName =
-        state$.value.currentRepo.refs.refs[refIndex + 1].name;
-      return from([fetchComparisonAction(action.refName, compareToRefName)]);
     })
   );
 
-const fetchCommitsEpic = (
-  action$: ActionsObservable<Action>,
-  state$: StateObservable<State>
+const triggerFetchCommitsOnRefSelectEpic = (
+  action$: ActionsObservable<Action>
 ): Observable<Action> =>
   action$.pipe(
-    ofType("FETCH_COMPARISON"),
-    mergeMap((action: FetchComparisonAction) => {
-      const currentRepo = state$.value.currentRepo;
-      if (!currentRepo) {
-        return empty();
-      }
+    ofType("UPDATE_SELECTED_REF"),
+    mergeMap((action: UpdateSelectedRefAction) => {
       return fetchComparison(
-        currentRepo.owner,
-        currentRepo.repo,
+        action.owner,
+        action.repo,
         action.refName,
         action.compareToRefName
       );
@@ -199,8 +173,7 @@ function fetchComparison(
 }
 
 const fetchJiraTicketsEpic = (
-  action$: ActionsObservable<Action>,
-  state$: StateObservable<State>
+  action$: ActionsObservable<Action>
 ): Observable<Action> =>
   action$.pipe(
     ofType("FETCH_JIRA_TICKETS"),
@@ -252,7 +225,7 @@ export const rootEpic = combineEpics(
   navigateToRepoEpic,
   triggerFetchRefsOnRepoUpdatedEpic,
   fetchRefsEpic,
+  navigateToRefEpic,
   triggerFetchCommitsOnRefSelectEpic,
-  fetchCommitsEpic,
   fetchJiraTicketsEpic
 );

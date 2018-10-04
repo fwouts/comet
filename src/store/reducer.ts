@@ -5,7 +5,6 @@ import {
   CurrentRepoState,
   EMPTY_STATE,
   Loadable,
-  RefsState,
   ReposState,
   State
 } from "./state";
@@ -52,42 +51,42 @@ const currentRepoReducer = (
         repo: action.repo,
         refs: EMPTY_STATE
       };
-    default:
-      if (currentRepoState) {
-        return produce(currentRepoState, draft => {
-          draft.refs = refsReducer(currentRepoState.refs, action);
-        });
-      }
-      return currentRepoState;
-  }
-};
-
-const refsReducer = (
-  refsState: Loadable<RefsState>,
-  action: Action
-): Loadable<RefsState> => {
-  switch (action.type) {
     case "UPDATE_REFS":
-      return action.refs;
-    case "SELECT_REF":
-      return produce(refsState, draft => {
-        if (draft.status === "loaded") {
-          draft.selectedRefName = action.refName;
-        }
+      if (!currentRepoState) {
+        return currentRepoState;
+      }
+      return produce(currentRepoState, draft => {
+        draft.refs = action.refs;
+      });
+    case "UPDATE_SELECTED_REF":
+      if (!currentRepoState) {
+        return {
+          owner: action.owner,
+          repo: action.repo,
+          refs: EMPTY_STATE,
+          selectedRefName: action.refName
+        };
+      }
+      return produce(currentRepoState || { refs: EMPTY_STATE }, draft => {
+        draft.owner = action.owner;
+        draft.repo = action.repo;
+        draft.selectedRefName = action.refName;
       });
     case "UPDATE_COMPARISON":
-      return produce(refsState, draft => {
-        if (
-          draft.status === "loaded" &&
-          draft.selectedRefName === action.refName
-        ) {
+      if (!currentRepoState) {
+        return currentRepoState;
+      }
+      return produce(currentRepoState, draft => {
+        if (draft.selectedRefName === action.refName) {
           draft.comparison = action.comparison;
         }
       });
     case "UPDATE_JIRA_TICKETS":
-      return produce(refsState, draft => {
+      if (!currentRepoState) {
+        return currentRepoState;
+      }
+      return produce(currentRepoState, draft => {
         if (
-          draft.status === "loaded" &&
           draft.comparison &&
           draft.comparison.status === "loaded" &&
           isEqual(draft.comparison.result.addedCommits, action.commits)
@@ -96,6 +95,6 @@ const refsReducer = (
         }
       });
     default:
-      return refsState;
+      return currentRepoState;
   }
 };

@@ -14,12 +14,12 @@ export interface CurrentRepoState {
   readonly owner: string;
   readonly repo: string;
   readonly refs: Loadable<RefsState>;
+  readonly selectedRefName?: string;
+  readonly comparison?: CommitsState;
 }
 
 export interface RefsState {
   readonly refs: Ref[];
-  readonly selectedRefName?: string;
-  readonly comparison?: CommitsState;
 }
 
 export type Ref = Branch | Tag;

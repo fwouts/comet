@@ -9,12 +9,13 @@ import { Commit, CompareRefsResult } from "../github/loader";
 import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "../jira/config";
 import { extractJiraKey } from "../jira/key";
 import { SPECIAL_DONE_STATUSES } from "../jira/loader";
-import { Dispatch, fetchComparisonAction } from "../store/actions";
+import { Dispatch, navigateToRefAction } from "../store/actions";
 import {
   CommitsState,
+  CurrentRepoState,
   JiraTicketsState,
   Loadable,
-  Ref,
+  RefsState,
   State
 } from "../store/state";
 import Spinner from "./Spinner";
@@ -88,18 +89,26 @@ const JiraTicket = styled.a<{ backgroundColor: string; loading?: boolean }>`
 `;
 
 class Comparison extends React.Component<{
-  refs: Ref[];
+  currentRepo: CurrentRepoState;
+  refs: Loadable<RefsState>;
   selectedRefName: string;
   comparison: CommitsState;
-  compareToAnotherRef(selectedRefName: string, compareToRefName: string): void;
+  compareToAnotherRef(
+    currentRepo: CurrentRepoState,
+    selectedRefName: string,
+    compareToRefName: string
+  ): void;
 }> {
   public render() {
-    const options = this.props.refs
-      .filter(r => r.name !== this.props.selectedRefName)
-      .map(r => ({
-        value: r.name,
-        label: r.name
-      }));
+    const options =
+      this.props.refs.status === "loaded"
+        ? this.props.refs.refs
+            .filter(r => r.name !== this.props.selectedRefName)
+            .map(r => ({
+              value: r.name,
+              label: r.name
+            }))
+        : [];
     return (
       <Container>
         <Header>
@@ -119,6 +128,7 @@ class Comparison extends React.Component<{
                 option &&
                 !(option instanceof Array) &&
                 this.props.compareToAnotherRef(
+                  this.props.currentRepo,
                   this.props.selectedRefName,
                   option.value
                 )
@@ -203,7 +213,7 @@ function jiraTicketForCommit(
   jiraTicketsState: Loadable<JiraTicketsState>
 ) {
   if (!jiraConfig) {
-    return <></>
+    return <></>;
   }
   const jiraKey = extractJiraKey(commit.commit.message);
   if (!jiraKey) {
@@ -256,22 +266,33 @@ function jiraLink(jiraKey: string) {
 const mapStateToProps = (state: State) => {
   if (
     !state.currentRepo ||
-    state.currentRepo.refs.status !== "loaded" ||
-    !state.currentRepo.refs.selectedRefName ||
-    !state.currentRepo.refs.comparison
+    !state.currentRepo.selectedRefName ||
+    !state.currentRepo.comparison
   ) {
     throw new Error(`Invalid state`);
   }
   return {
-    refs: state.currentRepo.refs.refs,
-    selectedRefName: state.currentRepo.refs.selectedRefName,
-    comparison: state.currentRepo.refs.comparison
+    currentRepo: state.currentRepo,
+    refs: state.currentRepo.refs,
+    selectedRefName: state.currentRepo.selectedRefName,
+    comparison: state.currentRepo.comparison
   };
 };
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  compareToAnotherRef: (selectedRefName: string, compareToRefName: string) =>
-    dispatch(fetchComparisonAction(selectedRefName, compareToRefName))
+  compareToAnotherRef: (
+    currentRepo: CurrentRepoState,
+    selectedRefName: string,
+    compareToRefName: string
+  ) =>
+    dispatch(
+      navigateToRefAction(
+        currentRepo.owner,
+        currentRepo.repo,
+        selectedRefName,
+        compareToRefName
+      )
+    )
 });
 
 export default connect(

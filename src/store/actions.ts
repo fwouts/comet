@@ -15,8 +15,8 @@ export type Action =
   | UpdateSelectedRepoAction
   | FetchRefsAction
   | UpdateRefsAction
-  | SelectRefAction
-  | FetchComparisonAction
+  | NavigateToRefAction
+  | UpdateSelectedRefAction
   | UpdateComparisonAction
   | FetchJiraTicketsAction
   | UpdateJiraTicketsAction;
@@ -106,30 +106,47 @@ export function updateRefsAction(refs: Loadable<RefsState>): UpdateRefsAction {
   };
 }
 
-export interface SelectRefAction {
-  type: "SELECT_REF";
-  refName: string;
-}
-
-export function selectRefAction(refName: string): SelectRefAction {
-  return {
-    type: "SELECT_REF",
-    refName
-  };
-}
-
-export interface FetchComparisonAction {
-  type: "FETCH_COMPARISON";
+export interface NavigateToRefAction {
+  type: "NAVIGATE_TO_REF";
+  owner: string;
+  repo: string;
   refName: string;
   compareToRefName: string;
 }
 
-export function fetchComparisonAction(
+export function navigateToRefAction(
+  owner: string,
+  repo: string,
   refName: string,
   compareToRefName: string
-): FetchComparisonAction {
+): NavigateToRefAction {
   return {
-    type: "FETCH_COMPARISON",
+    type: "NAVIGATE_TO_REF",
+    owner,
+    repo,
+    refName,
+    compareToRefName
+  };
+}
+
+export interface UpdateSelectedRefAction {
+  type: "UPDATE_SELECTED_REF";
+  owner: string;
+  repo: string;
+  refName: string;
+  compareToRefName: string;
+}
+
+export function updateSelectedRefAction(
+  owner: string,
+  repo: string,
+  refName: string,
+  compareToRefName: string
+): UpdateSelectedRefAction {
+  return {
+    type: "UPDATE_SELECTED_REF",
+    owner,
+    repo,
     refName,
     compareToRefName
   };

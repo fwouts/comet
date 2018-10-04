@@ -3,8 +3,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as React from "react";
 import { connect } from "react-redux";
 import styled from "styled-components";
-import { Dispatch, selectRefAction } from "../store/actions";
+import { Dispatch, navigateToRefAction } from "../store/actions";
 import {
+  CurrentRepoState,
   EMPTY_STATE,
   Loadable,
   LoadedState,
@@ -41,8 +42,10 @@ const RefItem = styled.li<{
 `;
 
 class RefList extends React.Component<{
+  currentRepo?: CurrentRepoState;
   refs: Loadable<RefsState>;
-  selectRef(refName: string): void;
+  selectedRefName?: string;
+  selectRef(currentRepo: CurrentRepoState, refName: string): void;
 }> {
   public render = () => (
     <Container>
@@ -55,8 +58,8 @@ class RefList extends React.Component<{
     return refs.refs.map(ref => (
       <RefItem
         key={ref.name}
-        selected={refs.selectedRefName === ref.name}
-        onClick={() => this.props.selectRef(ref.name)}
+        selected={this.props.selectedRefName === ref.name}
+        onClick={() => this.props.selectRef(this.props.currentRepo!, ref.name)}
       >
         <FontAwesomeIcon icon={ref.kind === "branch" ? faCodeBranch : faTag} />{" "}
         {ref.name}
@@ -66,11 +69,32 @@ class RefList extends React.Component<{
 }
 
 const mapStateToProps = (state: State) => ({
-  refs: state.currentRepo ? state.currentRepo.refs : EMPTY_STATE
+  currentRepo: state.currentRepo,
+  refs: state.currentRepo ? state.currentRepo.refs : EMPTY_STATE,
+  selectedRefName: state.currentRepo
+    ? state.currentRepo.selectedRefName
+    : undefined
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  selectRef: (refName: string) => dispatch(selectRefAction(refName))
+  selectRef: (currentRepo: CurrentRepoState, refName: string) => {
+    if (currentRepo.refs.status !== "loaded") {
+      return;
+    }
+    const refIndex = currentRepo.refs.refs.findIndex(r => r.name === refName);
+    const compareToRefName =
+      refIndex === currentRepo.refs.refs.length - 1
+        ? currentRepo.refs.refs[refIndex - 1].name
+        : currentRepo.refs.refs[refIndex + 1].name;
+    return dispatch(
+      navigateToRefAction(
+        currentRepo.owner,
+        currentRepo.repo,
+        refName,
+        compareToRefName
+      )
+    );
+  }
 });
 
 export default connect(

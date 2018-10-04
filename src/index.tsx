@@ -9,7 +9,11 @@ import App from "./components/App";
 import "./index.css";
 import registerServiceWorker from "./registerServiceWorker";
 import { parsePath } from "./routing";
-import { Action, updateSelectedRepoAction } from "./store/actions";
+import {
+  Action,
+  updateSelectedRefAction,
+  updateSelectedRepoAction
+} from "./store/actions";
 import { rootEpic } from "./store/epics";
 import { rootReducer } from "./store/reducer";
 import { State } from "./store/state";
@@ -44,7 +48,22 @@ registerServiceWorker();
 const locationListener = (location: Location) => {
   const path = parsePath(location.pathname);
   if (path) {
-    store.dispatch(updateSelectedRepoAction(path.owner, path.repo));
+    switch (path.kind) {
+      case "repo-only":
+        store.dispatch(updateSelectedRepoAction(path.owner, path.repo));
+        break;
+      case "repo-and-comparison":
+        store.dispatch(updateSelectedRepoAction(path.owner, path.repo));
+        store.dispatch(
+          updateSelectedRefAction(
+            path.owner,
+            path.repo,
+            path.selectedRefName,
+            path.compareToRefName
+          )
+        );
+        break;
+    }
   }
 };
 history.listen(locationListener);

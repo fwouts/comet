@@ -26,10 +26,7 @@ class CurrentRepo extends React.Component<{
 }
 
 const mapStateToProps = (state: State) => ({
-  comparison:
-    state.currentRepo && state.currentRepo.refs.status === "loaded"
-      ? state.currentRepo.refs.comparison
-      : undefined
+  comparison: state.currentRepo ? state.currentRepo.comparison : undefined
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({});
