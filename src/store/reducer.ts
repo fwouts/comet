@@ -39,7 +39,14 @@ const currentRepoReducer = (
   action: Action
 ): CurrentRepoState | undefined => {
   switch (action.type) {
-    case "SELECT_REPO":
+    case "UPDATE_SELECTED_REPO":
+      if (
+        currentRepoState &&
+        currentRepoState.owner === action.owner &&
+        currentRepoState.repo === action.repo
+      ) {
+        return currentRepoState;
+      }
       return {
         owner: action.owner,
         repo: action.repo,

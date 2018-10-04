@@ -11,7 +11,8 @@ import {
 export type Action =
   | FetchReposAction
   | UpdateReposAction
-  | SelectRepoAction
+  | NavigateToRepoAction
+  | UpdateSelectedRepoAction
   | FetchRefsAction
   | UpdateRefsAction
   | SelectRefAction
@@ -45,18 +46,35 @@ export function updateReposAction(
   };
 }
 
-export interface SelectRepoAction {
-  type: "SELECT_REPO";
+export interface NavigateToRepoAction {
+  type: "NAVIGATE_TO_REPO";
   owner: string;
   repo: string;
 }
 
-export function selectRepoAction(
+export function navigateToRepoAction(
   owner: string,
   repo: string
-): SelectRepoAction {
+): NavigateToRepoAction {
   return {
-    type: "SELECT_REPO",
+    type: "NAVIGATE_TO_REPO",
+    owner,
+    repo
+  };
+}
+
+export interface UpdateSelectedRepoAction {
+  type: "UPDATE_SELECTED_REPO";
+  owner: string;
+  repo: string;
+}
+
+export function updateSelectedRepoAction(
+  owner: string,
+  repo: string
+): UpdateSelectedRepoAction {
+  return {
+    type: "UPDATE_SELECTED_REPO",
     owner,
     repo
   };

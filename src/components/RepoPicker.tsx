@@ -2,7 +2,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import Select from "react-select";
 import styled from "styled-components";
-import { Dispatch, selectRepoAction } from "../store/actions";
+import { Dispatch, navigateToRepoAction } from "../store/actions";
 import { Loadable, ReposState, State } from "../store/state";
 import Spinner from "./Spinner";
 
@@ -13,7 +13,7 @@ const Container = styled.div`
 class RepoPicker extends React.Component<{
   repos: Loadable<ReposState>;
   currentRepo?: string;
-  selectRepo(repo: string): void;
+  navigateToRepo(repo: string): void;
 }> {
   public render() {
     if (this.props.repos.status !== "loaded") {
@@ -23,6 +23,9 @@ class RepoPicker extends React.Component<{
       value: `${r.owner}/${r.repo}`,
       label: `${r.owner}/${r.repo}`
     }));
+    const selectedOption = options.find(
+      option => option.value === this.props.currentRepo
+    );
     return (
       <Container>
         <Select
@@ -32,8 +35,9 @@ class RepoPicker extends React.Component<{
           onChange={option =>
             option &&
             !(option instanceof Array) &&
-            this.props.selectRepo(option.value)
+            this.props.navigateToRepo(option.value)
           }
+          value={selectedOption}
         />
       </Container>
     );
@@ -48,9 +52,9 @@ const mapStateToProps = (state: State) => ({
 });
 
 const mapDispatchToProps = (dispatch: Dispatch) => ({
-  selectRepo: (fullRepo: string) => {
+  navigateToRepo: (fullRepo: string) => {
     const [owner, repo] = fullRepo.split("/", 2);
-    dispatch(selectRepoAction(owner, repo));
+    dispatch(navigateToRepoAction(owner, repo));
   }
 });
 

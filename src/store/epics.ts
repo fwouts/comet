@@ -1,10 +1,11 @@
+import { push, RouterAction } from "connected-react-router";
 import {
   ActionsObservable,
   combineEpics,
   ofType,
   StateObservable
 } from "redux-observable";
-import { empty, from, Observable } from "rxjs";
+import { empty, from, Observable, of } from "rxjs";
 import { catchError, merge, mergeMap } from "rxjs/operators";
 import {
   Commit,
@@ -14,6 +15,7 @@ import {
 } from "../github/loader";
 import { extractJiraKey } from "../jira/key";
 import { JiraTicket, loadTickets } from "../jira/loader";
+import { producePath } from "../routing";
 import {
   Action,
   FetchComparisonAction,
@@ -21,12 +23,13 @@ import {
   FetchJiraTicketsAction,
   fetchJiraTicketsAction,
   fetchRefsAction,
+  NavigateToRepoAction,
   SelectRefAction,
-  SelectRepoAction,
   updateComparisonAction,
   updateJiraTicketsAction,
   updateRefsAction,
-  updateReposAction
+  updateReposAction,
+  UpdateSelectedRepoAction
 } from "./actions";
 import { EMPTY_STATE, State } from "./state";
 
@@ -57,13 +60,31 @@ function fetchRepos(): Observable<Action> {
   );
 }
 
-const triggerFetchRefsOnRepoSelectEpic = (
+const navigateToRepoEpic = (
+  action$: ActionsObservable<Action>,
+  state$: StateObservable<State>
+): Observable<RouterAction> =>
+  action$.pipe(
+    ofType("NAVIGATE_TO_REPO"),
+    mergeMap((action: NavigateToRepoAction) => {
+      return of(push(producePath(action.owner, action.repo)));
+    })
+  );
+
+const triggerFetchRefsOnRepoUpdatedEpic = (
   action$: ActionsObservable<Action>,
   state$: StateObservable<State>
 ): Observable<Action> =>
   action$.pipe(
-    ofType("SELECT_REPO"),
-    mergeMap((action: SelectRepoAction) => {
+    ofType("UPDATE_SELECTED_REPO"),
+    mergeMap((action: UpdateSelectedRepoAction) => {
+      if (
+        state$.value.currentRepo &&
+        state$.value.currentRepo.owner === action.owner &&
+        state$.value.currentRepo.repo === action.repo
+      ) {
+        return empty();
+      }
       return from([fetchRefsAction(action.owner, action.repo)]);
     })
   );
@@ -235,7 +256,8 @@ async function loadJiraTickets(
 
 export const rootEpic = combineEpics(
   fetchReposEpic,
-  triggerFetchRefsOnRepoSelectEpic,
+  navigateToRepoEpic,
+  triggerFetchRefsOnRepoUpdatedEpic,
   fetchRefsEpic,
   triggerFetchCommitsOnRefSelectEpic,
   fetchCommitsEpic,
