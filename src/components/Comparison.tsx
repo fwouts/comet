@@ -61,7 +61,9 @@ const CommitList = styled.ul`
 const CommitItem = styled.li`
   padding: 8px;
   background: #fff;
-  overflow: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 
   &&:nth-child(even) {
     background: #f8f8fc;
@@ -73,6 +75,8 @@ const CommitSha = styled.a`
   text-decoration: none;
   font-family: "Roboto Mono", monospace;
   font-size: 0.9em;
+  display: block;
+  margin: 0 8px;
 
   &&:hover {
     color: #777;
@@ -80,28 +84,34 @@ const CommitSha = styled.a`
   }
 `;
 
-const Author = styled.div`
-  float: right;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  color: #468;
-`;
-
-const Avatar = styled.img`
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  margin-left: 8px;
+const CommitMessage = styled.div`
+  flex-grow: 1;
 `;
 
 const JiraTicket = styled.a<{ backgroundColor: string; loading?: boolean }>`
   background: ${props => props.backgroundColor};
-  color: ${props => (props.loading ? "#333" : "#fff")};
-  margin-left: 16px;
+  color: #333;
+  margin: 0 8px;
   padding: 4px 20px;
-  border-radius: 6px;
+  border-radius: 8px;
   text-decoration: none;
+`;
+
+const Author = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const AuthorName = styled.span`
+  color: #468;
+`;
+
+const AuthorAvatar = styled.img`
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  margin-left: 8px;
 `;
 
 class Comparison extends React.Component<{
@@ -195,17 +205,17 @@ class Comparison extends React.Component<{
           <CommitItem key={commit.sha}>
             <FontAwesomeIcon icon={faArrowAltCircleRight} color="green" />
             {commitSha(commit)}
-            {author(commit)}
             {firstLine(commit.commit.message)}
             {jiraTicketForCommit(comparison.addedCommits, commit, jiraTickets)}
+            {author(commit)}
           </CommitItem>
         ))}
         {comparison.removedCommits.map(commit => (
           <CommitItem key={commit.sha}>
             <FontAwesomeIcon icon={faArrowAltCircleRight} color="red" />
             {commitSha(commit)}
-            {author(commit)}
             {firstLine(commit.commit.message)}
+            {author(commit)}
           </CommitItem>
         ))}
       </>
@@ -213,8 +223,8 @@ class Comparison extends React.Component<{
   }
 }
 
-function firstLine(commitMessage: string): string {
-  return commitMessage.split("\n", 2)[0];
+function firstLine(commitMessage: string) {
+  return <CommitMessage>{commitMessage.split("\n", 2)[0]}</CommitMessage>;
 }
 
 function commitSha(commit: Commit) {
@@ -231,8 +241,8 @@ function commitSha(commit: Commit) {
 function author(commit: Commit) {
   return (
     <Author>
-      {commit.commit.author.name}
-      {commit.author && <Avatar src={commit.author.avatar_url} />}
+      <AuthorName>{commit.commit.author.name}</AuthorName>
+      {commit.author && <AuthorAvatar src={commit.author.avatar_url} />}
     </Author>
   );
 }
@@ -279,7 +289,7 @@ function jiraTicketForCommit(
         target="_blank"
         backgroundColor={isDone ? "#2b2" : "#ccc"}
       >
-        {jiraKey} {isDone ? "✓" : " (incomplete)"}
+        {jiraKey} {isDone ? "✓" : " (has further commits)"}
       </JiraTicket>
     );
   }
