@@ -109,6 +109,9 @@ class Comparison extends React.Component<{
               label: r.name
             }))
         : [];
+    if (options.length === 0) {
+      return <Container />;
+    }
     return (
       <Container>
         <Header>
