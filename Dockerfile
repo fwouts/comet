@@ -16,4 +16,4 @@ COPY nginx.conf.template nginx.conf.template
 EXPOSE 80
 
 # Dynamically use Jira and GitHub configuration from environment.
-CMD [ "sh", "-c", "(envsubst '$JIRA_HOST' < nginx.conf.template > /etc/nginx/nginx.conf) && JS_FILE=$(ls static/js/*.js) && (envsubst '$GITHUB_TOKEN,$JIRA_HOST,$JIRA_EMAIL,$JIRA_API_TOKEN' < $JS_FILE > $JS_FILE) && nginx -g daemon\\ off\\;" ]
+CMD [ "sh", "-c", "export JIRA_HOST=${JIRA_HOST:-http://localhost/ignore} && (envsubst '$JIRA_HOST' < nginx.conf.template > /etc/nginx/nginx.conf) && JS_FILE=$(ls static/js/*.js) && (envsubst '$GITHUB_TOKEN,$JIRA_HOST,$JIRA_EMAIL,$JIRA_API_TOKEN' < $JS_FILE > $JS_FILE) && nginx -g daemon\\ off\\;" ]
