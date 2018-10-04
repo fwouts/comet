@@ -47,10 +47,5 @@ const locationListener = (location: Location) => {
     store.dispatch(updateSelectedRepoAction(path.owner, path.repo));
   }
 };
-history.listen(location => {
-  const path = parsePath(location.pathname);
-  if (path) {
-    store.dispatch(updateSelectedRepoAction(path.owner, path.repo));
-  }
-});
+history.listen(locationListener);
 locationListener(history.location);
