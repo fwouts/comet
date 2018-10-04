@@ -1,53 +1,24 @@
 # Comet
 
+[![Build](https://img.shields.io/circleci/project/github/zenclabs/comet.svg)](https://circleci.com/gh/zenclabs/comet)
+[![Docker build](https://img.shields.io/docker/build/zenclabs/comet.svg)](https://hub.docker.com/r/zenclabs/comet/builds)
+
 This is a dashboard to easily compare branches and tags for any GitHub repository.
 
-## Instructions
+## Setup
 
-_Note: installation steps will soon be a lot more straightforward._
+- Make sure [Docker](https://www.docker.com/get-started) is running on your computer.
+- [Generate a GitHub API token](https://github.com/settings/tokens). Make sure to give it the `repo` permission, which is required to navigate through your repositories.
+- Run the following command to start the dashboard:
+  ```
+  docker run -it -p 3080:80 -e GITHUB_TOKEN=....... zenclabs/comet
+  ```
+- Navigate to http://localhost:3080 to see the dashboard.
 
-### 1. Install Yarn
+### Jira integration
 
-Follow the [official instructions](https://yarnpkg.com/en/docs/install).
-
-### 2. Clone the repository
-
-```
-git clone https://github.com/zenclabs/comet.git
-cd comet
-yarn install
-```
-
-### 3. Create a file called `src/config.ts`
-
-Your config file will contain your GitHub API token, generated from
-https://github.com/settings/tokens with the "repo" permission
-
-```
-export const GITHUB_TOKEN = "=.......................";
-```
-
-If you'd like to automatically see the status of associated Jira tickets, add the following constants (optional):
-
-```
-// Jira host (example below if you use Jira Cloud).
-export const JIRA_HOST = "https://[jira-project].atlassian.net";
-
-// If you use Jira Cloud, you'll need to set up a proxy, started with `yarn jira-proxy`.
-// Upvote https://jira.atlassian.com/browse/JRACLOUD-30371 if you'd like this fixed.
-export const JIRA_PROXIED_HOST = "http://localhost:3001";
-
-// Your Jira email account.
-export const JIRA_EMAIL = "you@domain.com";
-
-// A Jira API token. See https://confluence.atlassian.com/cloud/api-tokens-938839638.html.
-export const JIRA_API_TOKEN = "............";
-```
-
-### 4. Start the local server
-
-```
-yarn start
-```
-
-Comet will then be available at http://localhost:3000.
+If you'd like to automatically see the status of associated Jira tickets, you'll need to pass
+a few additional environment variables through Docker:
+- `JIRA_HOST`, for example if you use Jira Cloud `https://yourproject.atlassian.net`.
+- `JIRA_EMAIL`, which is your Jira account.
+- `JIRA_API_TOKEN`, see [official instructions](https://confluence.atlassian.com/cloud/api-tokens-938839638.html).
