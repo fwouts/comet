@@ -144,5 +144,9 @@ export interface Commit {
     };
     message: string;
   };
+  author: {
+    login: string;
+    avatar_url: string;
+  };
   html_url: string;
 }

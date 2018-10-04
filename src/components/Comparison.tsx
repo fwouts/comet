@@ -61,6 +61,7 @@ const CommitList = styled.ul`
 const CommitItem = styled.li`
   padding: 8px;
   background: #fff;
+  overflow: auto;
 
   &&:nth-child(even) {
     background: #f8f8fc;
@@ -77,6 +78,21 @@ const CommitSha = styled.a`
     color: #777;
     text-decoration: underline;
   }
+`;
+
+const Author = styled.div`
+  float: right;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  color: #468;
+`;
+
+const Avatar = styled.img`
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  margin-left: 8px;
 `;
 
 const JiraTicket = styled.a<{ backgroundColor: string; loading?: boolean }>`
@@ -179,6 +195,7 @@ class Comparison extends React.Component<{
           <CommitItem key={commit.sha}>
             <FontAwesomeIcon icon={faArrowAltCircleRight} color="green" />
             {commitSha(commit)}
+            {author(commit)}
             {firstLine(commit.commit.message)}
             {jiraTicketForCommit(comparison.addedCommits, commit, jiraTickets)}
           </CommitItem>
@@ -187,6 +204,7 @@ class Comparison extends React.Component<{
           <CommitItem key={commit.sha}>
             <FontAwesomeIcon icon={faArrowAltCircleRight} color="red" />
             {commitSha(commit)}
+            {author(commit)}
             {firstLine(commit.commit.message)}
           </CommitItem>
         ))}
@@ -207,6 +225,15 @@ function commitSha(commit: Commit) {
         {commit.sha.substr(0, 7)}
       </CommitSha>{" "}
     </>
+  );
+}
+
+function author(commit: Commit) {
+  return (
+    <Author>
+      {commit.commit.author.name}
+      <Avatar src={commit.author.avatar_url} />
+    </Author>
   );
 }
 
