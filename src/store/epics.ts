@@ -78,13 +78,6 @@ const triggerFetchRefsOnRepoUpdatedEpic = (
   action$.pipe(
     ofType("UPDATE_SELECTED_REPO"),
     mergeMap((action: UpdateSelectedRepoAction) => {
-      if (
-        state$.value.currentRepo &&
-        state$.value.currentRepo.owner === action.owner &&
-        state$.value.currentRepo.repo === action.repo
-      ) {
-        return empty();
-      }
       return from([fetchRefsAction(action.owner, action.repo)]);
     })
   );

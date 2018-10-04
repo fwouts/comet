@@ -1,7 +1,6 @@
 import * as React from "react";
 import { connect } from "react-redux";
 import styled from "styled-components";
-import { ParsedPath } from "../routing";
 import {
   Dispatch,
   fetchReposAction,
@@ -17,18 +16,12 @@ const Container = styled.div`
 `;
 
 class App extends React.Component<{
-  path: ParsedPath;
   currentRepo?: CurrentRepoState;
   loadRepos(): void;
   updateSelectedRepo(owner: string, repo: string): void;
 }> {
   public componentDidMount() {
-    this.updateSelectedRepo();
     this.props.loadRepos();
-  }
-
-  public componentDidUpdate() {
-    this.updateSelectedRepo();
   }
 
   public render = () => (
@@ -37,15 +30,6 @@ class App extends React.Component<{
       {this.props.currentRepo && <CurrentRepo />}
     </Container>
   );
-
-  private updateSelectedRepo() {
-    if (this.props.path) {
-      this.props.updateSelectedRepo(
-        this.props.path.owner,
-        this.props.path.repo
-      );
-    }
-  }
 }
 
 const mapStateToProps = (state: State) => ({
