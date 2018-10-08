@@ -11,6 +11,8 @@ http {
     location /jira/ {
       proxy_pass $JIRA_HOST/;
     }
-    location / {}
+    location / {
+      try_files $uri /index.html;
+    }
   }
 }
