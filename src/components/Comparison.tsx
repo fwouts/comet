@@ -11,7 +11,7 @@ import { extractJiraKey } from "../jira/key";
 import { SPECIAL_DONE_STATUSES } from "../jira/loader";
 import { Dispatch, navigateToRefAction } from "../store/actions";
 import {
-  CommitsState,
+  ComparisonState,
   CurrentRepoState,
   JiraTicketsState,
   Loadable,
@@ -121,7 +121,7 @@ class Comparison extends React.Component<{
   currentRepo: CurrentRepoState;
   refs: Loadable<RefsState>;
   selectedRefName: string;
-  comparison: CommitsState;
+  comparison: ComparisonState;
   compareToAnotherRef(
     currentRepo: CurrentRepoState,
     selectedRefName: string,

@@ -15,7 +15,7 @@ export interface CurrentRepoState {
   readonly repo: string;
   readonly refs: Loadable<RefsState>;
   readonly selectedRefName?: string;
-  readonly comparison?: CommitsState;
+  readonly comparison?: ComparisonState;
 }
 
 export interface RefsState {
@@ -34,7 +34,7 @@ export interface Tag {
   readonly name: string;
 }
 
-export type CommitsState = Loadable<
+export type ComparisonState = Loadable<
   {
     readonly result: CompareRefsResult;
     readonly jiraTickets: Loadable<JiraTicketsState>;

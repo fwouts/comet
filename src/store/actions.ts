@@ -1,7 +1,7 @@
 import * as redux from "redux";
 import { Commit } from "../github/loader";
 import {
-  CommitsState,
+  ComparisonState,
   JiraTicketsState,
   Loadable,
   RefsState,
@@ -155,12 +155,12 @@ export function updateSelectedRefAction(
 export interface UpdateComparisonAction {
   type: "UPDATE_COMPARISON";
   refName: string;
-  comparison: CommitsState;
+  comparison: ComparisonState;
 }
 
 export function updateComparisonAction(
   refName: string,
-  comparison: CommitsState
+  comparison: ComparisonState
 ): UpdateComparisonAction {
   return {
     type: "UPDATE_COMPARISON",

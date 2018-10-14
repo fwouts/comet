@@ -2,7 +2,7 @@ import * as React from "react";
 import { connect } from "react-redux";
 import styled from "styled-components";
 import { Dispatch } from "../store/actions";
-import { CommitsState, State } from "../store/state";
+import { ComparisonState, State } from "../store/state";
 import Comparison from "./Comparison";
 import RefList from "./RefList";
 
@@ -15,7 +15,7 @@ const RootContainer = styled.div`
 `;
 
 class CurrentRepo extends React.Component<{
-  comparison?: CommitsState;
+  comparison?: ComparisonState;
 }> {
   public render = () => (
     <RootContainer>
