@@ -1,0 +1,15 @@
+general:
+  name: comet
+  description: Comet
+
+build:
+  registry: registry.hub.docker.com
+  image: zenclabs/comet
+
+deploy:
+  namespace: default
+  website: true
+  regions:
+    - name: au
+      deployments:
+        - comet
