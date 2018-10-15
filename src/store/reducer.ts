@@ -94,6 +94,16 @@ const currentRepoReducer = (
           draft.comparison.jiraTickets = action.jiraTickets;
         }
       });
+    case "TOGGLE_RELEASE_NOTES":
+      if (!currentRepoState) {
+        return currentRepoState;
+      }
+      return produce(currentRepoState, draft => {
+        if (draft.comparison && draft.comparison.status === "loaded") {
+          draft.comparison.showReleaseNotes = !draft.comparison
+            .showReleaseNotes;
+        }
+      });
     default:
       return currentRepoState;
   }

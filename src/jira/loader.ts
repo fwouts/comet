@@ -5,6 +5,10 @@ import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "./config";
 export const SPECIAL_DONE_STATUSES = new Set(["Ready for Deploy"]);
 
 export interface JiraTicket {
+  id: string;
+  key: string;
+  summary: string;
+  issueType: string;
   status: {
     name: string;
     categoryKey: string;
@@ -73,6 +77,10 @@ export async function loadTicket(jiraKey: string): Promise<JiraTicket> {
       );
     });
   return {
+    id: issueId,
+    key: jiraKey,
+    issueType: getIssueData.fields.issuetype.name,
+    summary: getIssueData.fields.summary,
     status: {
       name: getIssueData.fields.status.name,
       categoryKey: getIssueData.fields.status.statusCategory.key,
@@ -84,6 +92,14 @@ export async function loadTicket(jiraKey: string): Promise<JiraTicket> {
 
 export interface GetIssueResponse {
   fields: {
+    summary: string;
+    issuetype: {
+      name: string;
+      iconUrl: string;
+    };
+    resolution: {
+      name: string;
+    };
     status: {
       name: string;
       statusCategory: {

@@ -172,7 +172,8 @@ function fetchComparison(
               status: "loaded",
               compareToRefName,
               result: comparison,
-              jiraTickets: EMPTY_STATE
+              jiraTickets: EMPTY_STATE,
+              showReleaseNotes: false
             }),
             fetchJiraTicketsAction(comparison.addedCommits)
           ])

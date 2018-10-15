@@ -1,15 +1,22 @@
 import { faArrowAltCircleRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
+import ReactModal from "react-modal";
 import { connect } from "react-redux";
 import Select from "react-select";
 import { ClipLoader } from "react-spinners";
+import { isJiraTicketDone } from "src/jira/status";
+import { generateReleaseNotes } from "src/store/helpers/release-notes";
 import styled from "styled-components";
 import { Commit, CompareRefsResult } from "../github/loader";
 import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "../jira/config";
 import { extractJiraKey } from "../jira/key";
-import { SPECIAL_DONE_STATUSES } from "../jira/loader";
-import { Dispatch, navigateToRefAction } from "../store/actions";
+import { JiraCommit } from "../jira/loader";
+import {
+  Dispatch,
+  navigateToRefAction,
+  toggleReleaseNotesAction
+} from "../store/actions";
 import {
   ComparisonState,
   CurrentRepoState,
@@ -40,6 +47,21 @@ const CompareToBranch = styled.div`
   padding: 6px;
   flex-grow: 1;
 `;
+
+const ToggleReleaseNotesButton = styled.button`
+  border-radius: 8px;
+  margin: 8px 12px;
+  outline: none;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.9em;
+
+  &&:hover {
+    background: #f8f8f8;
+  }
+`;
+
+const ReleaseNotes = styled.pre``;
 
 const Description = styled.p`
   margin: 12px;
@@ -127,6 +149,7 @@ class Comparison extends React.Component<{
     selectedRefName: string,
     compareToRefName: string
   ): void;
+  toggleReleaseNotes(): void;
 }> {
   public render() {
     const options =
@@ -167,9 +190,27 @@ class Comparison extends React.Component<{
               }
             />
           </CompareToBranch>
+          {this.props.comparison.status === "loaded" && (
+            <ToggleReleaseNotesButton onClick={this.props.toggleReleaseNotes}>
+              {this.props.comparison.showReleaseNotes
+                ? "Hide release notes"
+                : "Show release notes"}
+            </ToggleReleaseNotesButton>
+          )}
         </Header>
         {this.props.comparison.status === "loaded" && (
           <>
+            <ReactModal
+              isOpen={this.props.comparison.showReleaseNotes}
+              shouldCloseOnEsc={true}
+              shouldCloseOnOverlayClick={true}
+              onRequestClose={this.props.toggleReleaseNotes}
+              ariaHideApp={false}
+            >
+              <ReleaseNotes>
+                {generateReleaseNotes(this.props.comparison)}
+              </ReleaseNotes>
+            </ReactModal>
             <Description>
               {this.props.comparison.result.aheadBy} commits added.
               <br />
@@ -277,9 +318,7 @@ function jiraTicketForCommit(
   if (jiraKey && jiraTicketsState.jiraTickets[jiraKey]) {
     const jiraTicket = jiraTicketsState.jiraTickets[jiraKey];
     const jiraStatus = jiraTicket.status.name;
-    const categoryDone =
-      jiraTicket.status.categoryKey === "done" ||
-      SPECIAL_DONE_STATUSES.has(jiraTicket.status.name);
+    const ticketIsNowDone = isJiraTicketDone(jiraTicket);
     let hasFurtherCommits = false;
     if (jiraTicket.commits.length > 0) {
       const lastCommits: JiraCommit[] = [];
@@ -303,10 +342,12 @@ function jiraTicketForCommit(
       <JiraTicket
         href={jiraLink(jiraKey)}
         target="_blank"
-        backgroundColor={categoryDone && !hasFurtherCommits ? "#2b2" : "#ccc"}
+        backgroundColor={
+          ticketIsNowDone && !hasFurtherCommits ? "#2b2" : "#ccc"
+        }
       >
         {jiraKey} - {jiraStatus}
-        {categoryDone && !hasFurtherCommits && "✓"}{" "}
+        {ticketIsNowDone && !hasFurtherCommits && "✓"}{" "}
         {hasFurtherCommits && "(more commits)"}
       </JiraTicket>
     );
@@ -350,7 +391,8 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
         selectedRefName,
         compareToRefName
       )
-    )
+    ),
+  toggleReleaseNotes: () => dispatch(toggleReleaseNotesAction())
 });
 
 export default connect(

@@ -19,7 +19,8 @@ export type Action =
   | UpdateSelectedRefAction
   | UpdateComparisonAction
   | FetchJiraTicketsAction
-  | UpdateJiraTicketsAction;
+  | UpdateJiraTicketsAction
+  | ToggleReleaseNotesAction;
 export type Dispatch = redux.Dispatch<Action>;
 
 export interface FetchReposAction {
@@ -197,5 +198,15 @@ export function updateJiraTicketsAction(
     type: "UPDATE_JIRA_TICKETS",
     commits,
     jiraTickets
+  };
+}
+
+export interface ToggleReleaseNotesAction {
+  type: "TOGGLE_RELEASE_NOTES";
+}
+
+export function toggleReleaseNotesAction(): ToggleReleaseNotesAction {
+  return {
+    type: "TOGGLE_RELEASE_NOTES"
   };
 }

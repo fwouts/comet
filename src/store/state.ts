@@ -38,6 +38,7 @@ export type ComparisonState = Loadable<
   {
     readonly result: CompareRefsResult;
     readonly jiraTickets: Loadable<JiraTicketsState>;
+    readonly showReleaseNotes: boolean;
   },
   {
     readonly compareToRefName: string;
