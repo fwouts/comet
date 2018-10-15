@@ -5,13 +5,13 @@ import ReactModal from "react-modal";
 import { connect } from "react-redux";
 import Select from "react-select";
 import { ClipLoader } from "react-spinners";
-import { isJiraTicketDone } from "src/jira/status";
+import { isJiraTicketDone, jiraTicketHasFurtherCommits } from "src/jira/status";
+import { findJiraTicket } from "src/store/helpers/find-ticket";
 import { generateReleaseNotes } from "src/store/helpers/release-notes";
 import styled from "styled-components";
 import { Commit, CompareRefsResult } from "../github/loader";
 import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "../jira/config";
-import { extractJiraKey } from "../jira/key";
-import { JiraCommit, JiraTicket } from "../jira/loader";
+import { JiraTicket } from "../jira/loader";
 import {
   Dispatch,
   navigateToRefAction,
@@ -304,63 +304,37 @@ function jiraTicketForCommit(
   commit: Commit,
   jiraTicketsState: Loadable<JiraTicketsState>
 ) {
-  if (!jiraConfig) {
+  const loadableJiraTicket = findJiraTicket(commit, jiraTicketsState);
+  if (loadableJiraTicket === null) {
     return <></>;
   }
-  const jiraKey = extractJiraKey(commit.commit.message);
-  if (!jiraKey) {
-    return <></>;
-  }
-  if (jiraTicketsState.status !== "loaded") {
+  if (loadableJiraTicket.status !== "loaded") {
     return (
       <JiraTicket
-        href={jiraLink(jiraKey)}
+        href={jiraLink(loadableJiraTicket.key)}
         target="_blank"
         backgroundColor="#eee"
         loading={true}
       >
-        {jiraKey} <ClipLoader size={12} />
+        {loadableJiraTicket.key} <ClipLoader size={12} />
       </JiraTicket>
     );
   }
-  if (jiraKey && jiraTicketsState.loaded.jiraTickets[jiraKey]) {
-    const jiraTicket = jiraTicketsState.loaded.jiraTickets[jiraKey];
-    const jiraStatus = jiraTicket.status.name;
-    const ticketIsNowDone = isJiraTicketDone(jiraTicket);
-    let hasFurtherCommits = false;
-    if (jiraTicket.commits.length > 0) {
-      const lastCommits: JiraCommit[] = [];
-      for (const jiraCommit of jiraTicket.commits) {
-        if (lastCommits.length === 0) {
-          lastCommits.push(jiraCommit);
-        } else if (lastCommits[0].message === jiraCommit.message) {
-          // This is probably a bunch of cherry-picks.
-          lastCommits.push(jiraCommit);
-        } else {
-          break;
-        }
-      }
-      const lastCommitShas = new Set(lastCommits.map(c => c.id));
-      // The ticket is only done in this particular branch if the last commit is included in this comparison.
-      // This means that if we can't find one of the last commits in this branch, then there are further commits.
-      hasFurtherCommits =
-        allCommits.findIndex(c => lastCommitShas.has(c.sha)) === -1;
-    }
-    return (
-      <JiraTicket
-        href={jiraLink(jiraKey)}
-        target="_blank"
-        backgroundColor={
-          ticketIsNowDone && !hasFurtherCommits ? "#2b2" : "#ccc"
-        }
-      >
-        {jiraKey} - {jiraStatus}
-        {ticketIsNowDone && !hasFurtherCommits && "✓"}{" "}
-        {hasFurtherCommits && "(more commits)"}
-      </JiraTicket>
-    );
-  }
-  return <></>;
+  const jiraTicket = loadableJiraTicket.loaded;
+  const jiraStatus = jiraTicket.status.name;
+  const ticketIsNowDone = isJiraTicketDone(jiraTicket);
+  const hasFurtherCommits = jiraTicketHasFurtherCommits(jiraTicket, allCommits);
+  return (
+    <JiraTicket
+      href={jiraLink(jiraTicket.key)}
+      target="_blank"
+      backgroundColor={ticketIsNowDone && !hasFurtherCommits ? "#2b2" : "#ccc"}
+    >
+      {jiraTicket.key} - {jiraStatus}
+      {ticketIsNowDone && !hasFurtherCommits && "✓"}{" "}
+      {hasFurtherCommits && "(more commits)"}
+    </JiraTicket>
+  );
 }
 
 function jiraLink(jiraKey: string) {
