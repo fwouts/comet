@@ -130,6 +130,10 @@ const Ticket = styled.a`
   text-decoration: none;
 `;
 
+const TicketType = styled.img`
+  margin-left: 8px;
+`;
+
 const TicketSummary = styled.div`
   padding: 4px 0 4px 8px;
 `;
@@ -366,6 +370,10 @@ function jiraTicketForCommit(
       );
       return (
         <Ticket href={jiraLink(jiraTicket.key)} target="_blank">
+          <TicketType
+            src={jiraTicket.issueType.iconUrl}
+            title={jiraTicket.issueType.name}
+          />
           <TicketSummary>
             {jiraTicket.key} - {jiraTicket.summary}
           </TicketSummary>

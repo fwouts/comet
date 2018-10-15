@@ -8,7 +8,10 @@ export interface JiraTicket {
   id: string;
   key: string;
   summary: string;
-  issueType: string;
+  issueType: {
+    name: string;
+    iconUrl: string;
+  };
   status: {
     name: string;
     categoryKey: string;
@@ -79,7 +82,10 @@ export async function loadTicket(jiraKey: string): Promise<JiraTicket> {
   return {
     id: issueId,
     key: jiraKey,
-    issueType: getIssueData.fields.issuetype.name,
+    issueType: {
+      name: getIssueData.fields.issuetype.name,
+      iconUrl: getIssueData.fields.issuetype.iconUrl
+    },
     summary: getIssueData.fields.summary,
     status: {
       name: getIssueData.fields.status.name,

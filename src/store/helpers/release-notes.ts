@@ -14,10 +14,10 @@ export function generateReleaseNotes(comparison: ComparisonState): string {
   );
   const ticketsByIssueType = tickets.reduce(
     (acc, ticket) => {
-      if (!acc[ticket.issueType]) {
-        acc[ticket.issueType] = [];
+      if (!acc[ticket.issueType.name]) {
+        acc[ticket.issueType.name] = [];
       }
-      acc[ticket.issueType].push(ticket);
+      acc[ticket.issueType.name].push(ticket);
       return acc;
     },
     {} as {
