@@ -1,7 +1,7 @@
 import { connectRouter, routerMiddleware } from "connected-react-router";
 import { createBrowserHistory, Location } from "history";
-import * as React from "react";
-import * as ReactDOM from "react-dom";
+import React from "react";
+import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { applyMiddleware, compose, createStore } from "redux";
 import { createEpicMiddleware } from "redux-observable";

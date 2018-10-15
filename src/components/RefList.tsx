@@ -1,6 +1,6 @@
 import { faCodeBranch, faTag } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import * as React from "react";
+import React from "react";
 import { connect } from "react-redux";
 import styled from "styled-components";
 import { Dispatch, navigateToRefAction } from "../store/actions";

@@ -1,4 +1,4 @@
-import * as Octokit from "@octokit/rest";
+import Octokit from "@octokit/rest";
 import * as config from "../config";
 import { Branch, Ref, Tag } from "../store/state";
 

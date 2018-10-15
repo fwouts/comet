@@ -1,6 +1,6 @@
-import * as cors from "cors";
-import * as express from "express";
-import * as request from "request";
+import cors from "cors";
+import express from "express";
+import request from "request";
 import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "./config";
 
 // Jira Cloud API is not accessible from a web client directly because of

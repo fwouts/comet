@@ -1,4 +1,4 @@
-import * as redux from "redux";
+import redux from "redux";
 import { Commit } from "../github/loader";
 import {
   ComparisonState,
