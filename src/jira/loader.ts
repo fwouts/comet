@@ -53,7 +53,7 @@ export async function loadTicket(jiraKey: string): Promise<JiraTicket> {
   const getCommitsResponse = await axios.get(
     `${
       jiraConfig.JIRA_PROXIED_HOST
-    }/rest/dev-status/1.0/issue/detail?issueId=${issueId}&applicationType=github&dataType=repository`,
+    }/rest/dev-status/1.0/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=repository`,
     {
       headers
     }
