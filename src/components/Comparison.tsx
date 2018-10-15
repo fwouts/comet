@@ -331,8 +331,8 @@ function jiraTicketForCommit(
       backgroundColor={ticketIsNowDone && !hasFurtherCommits ? "#2b2" : "#ccc"}
     >
       {jiraTicket.key} - {jiraStatus}
-      {ticketIsNowDone && !hasFurtherCommits && "✓"}{" "}
-      {hasFurtherCommits && "(more commits)"}
+      {ticketIsNowDone && !hasFurtherCommits && " ✓ "}{" "}
+      {hasFurtherCommits && " (more commits)"}
     </JiraTicket>
   );
 }
