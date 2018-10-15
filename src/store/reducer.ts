@@ -89,9 +89,9 @@ const currentRepoReducer = (
         if (
           draft.comparison &&
           draft.comparison.status === "loaded" &&
-          isEqual(draft.comparison.result.addedCommits, action.commits)
+          isEqual(draft.comparison.loaded.result.addedCommits, action.commits)
         ) {
-          draft.comparison.jiraTickets = action.jiraTickets;
+          draft.comparison.loaded.jiraTickets = action.jiraTickets;
         }
       });
     case "TOGGLE_RELEASE_NOTES":
@@ -100,7 +100,7 @@ const currentRepoReducer = (
       }
       return produce(currentRepoState, draft => {
         if (draft.comparison && draft.comparison.status === "loaded") {
-          draft.comparison.showReleaseNotes = !draft.comparison
+          draft.comparison.loaded.showReleaseNotes = !draft.comparison.loaded
             .showReleaseNotes;
         }
       });

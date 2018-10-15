@@ -5,11 +5,13 @@ import { ComparisonState } from "../state";
 export function generateReleaseNotes(comparison: ComparisonState): string {
   if (
     comparison.status !== "loaded" ||
-    comparison.jiraTickets.status !== "loaded"
+    comparison.loaded.jiraTickets.status !== "loaded"
   ) {
     return "Loading...";
   }
-  const tickets = Object.values(comparison.jiraTickets.jiraTickets);
+  const tickets = Object.values(
+    comparison.loaded.jiraTickets.loaded.jiraTickets
+  );
   const ticketsByIssueType = tickets.reduce(
     (acc, ticket) => {
       if (!acc[ticket.issueType]) {

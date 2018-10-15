@@ -49,7 +49,9 @@ function fetchRepos(): Observable<Action> {
           from([
             updateReposAction({
               status: "loaded",
-              suggested
+              loaded: {
+                suggested
+              }
             })
           ])
         )
@@ -110,7 +112,9 @@ function fetchRefs(
           from([
             updateRefsAction({
               status: "loaded",
-              refs
+              loaded: {
+                refs
+              }
             })
           ])
         )
@@ -171,9 +175,11 @@ function fetchComparison(
             updateComparisonAction(refName, {
               status: "loaded",
               compareToRefName,
-              result: comparison,
-              jiraTickets: EMPTY_STATE,
-              showReleaseNotes: false
+              loaded: {
+                result: comparison,
+                jiraTickets: EMPTY_STATE,
+                showReleaseNotes: false
+              }
             }),
             fetchJiraTicketsAction(comparison.addedCommits)
           ])
@@ -213,7 +219,9 @@ function fetchJiraTickets(commits: Commit[]): Observable<Action> {
           from([
             updateJiraTicketsAction(commits, {
               status: "loaded",
-              jiraTickets
+              loaded: {
+                jiraTickets
+              }
             })
           ])
         )

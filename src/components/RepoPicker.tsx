@@ -19,7 +19,7 @@ class RepoPicker extends React.Component<{
     if (this.props.repos.status !== "loaded") {
       return Spinner;
     }
-    const options = this.props.repos.suggested.map(r => ({
+    const options = this.props.repos.loaded.suggested.map(r => ({
       value: `${r.owner}/${r.repo}`,
       label: `${r.owner}/${r.repo}`
     }));

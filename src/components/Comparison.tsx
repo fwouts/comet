@@ -11,7 +11,7 @@ import styled from "styled-components";
 import { Commit, CompareRefsResult } from "../github/loader";
 import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "../jira/config";
 import { extractJiraKey } from "../jira/key";
-import { JiraCommit } from "../jira/loader";
+import { JiraCommit, JiraTicket } from "../jira/loader";
 import {
   Dispatch,
   navigateToRefAction,
@@ -107,9 +107,13 @@ const CommitSha = styled.a`
   }
 `;
 
-const CommitMessage = styled.div`
+const CommitInfo = styled.div`
   flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 `;
+
+const CommitMessage = styled.div``;
 
 const JiraTicket = styled.a<{ backgroundColor: string; loading?: boolean }>`
   user-select: none;
@@ -154,7 +158,7 @@ class Comparison extends React.Component<{
   public render() {
     const options =
       this.props.refs.status === "loaded"
-        ? this.props.refs.refs
+        ? this.props.refs.loaded.refs
             .filter(r => r.name !== this.props.selectedRefName)
             .map(r => ({
               value: r.name,
@@ -192,7 +196,7 @@ class Comparison extends React.Component<{
           </CompareToBranch>
           {this.props.comparison.status === "loaded" && (
             <ToggleReleaseNotesButton onClick={this.props.toggleReleaseNotes}>
-              {this.props.comparison.showReleaseNotes
+              {this.props.comparison.loaded.showReleaseNotes
                 ? "Hide release notes"
                 : "Show release notes"}
             </ToggleReleaseNotesButton>
@@ -201,7 +205,7 @@ class Comparison extends React.Component<{
         {this.props.comparison.status === "loaded" && (
           <>
             <ReactModal
-              isOpen={this.props.comparison.showReleaseNotes}
+              isOpen={this.props.comparison.loaded.showReleaseNotes}
               shouldCloseOnEsc={true}
               shouldCloseOnOverlayClick={true}
               onRequestClose={this.props.toggleReleaseNotes}
@@ -212,10 +216,10 @@ class Comparison extends React.Component<{
               </ReleaseNotes>
             </ReactModal>
             <Description>
-              {this.props.comparison.result.aheadBy} commits added.
+              {this.props.comparison.loaded.result.aheadBy} commits added.
               <br />
-              {this.props.comparison.result.behindBy} commits removed.
-              {this.props.comparison.result.hadToOmitCommits && (
+              {this.props.comparison.loaded.result.behindBy} commits removed.
+              {this.props.comparison.loaded.result.hadToOmitCommits && (
                 <>
                   <br />
                   <br />
@@ -228,8 +232,8 @@ class Comparison extends React.Component<{
             </Description>
             <CommitList>
               {this.renderComparisonList(
-                this.props.comparison.result,
-                this.props.comparison.jiraTickets
+                this.props.comparison.loaded.result,
+                this.props.comparison.loaded.jiraTickets
               )}
             </CommitList>
           </>
@@ -249,7 +253,7 @@ class Comparison extends React.Component<{
           <CommitItem key={commit.sha}>
             <FontAwesomeIcon icon={faArrowAltCircleRight} color="green" />
             {commitSha(commit)}
-            {firstLine(commit.commit.message)}
+            {commitInfo(commit.commit.message)}
             {jiraTicketForCommit(comparison.addedCommits, commit, jiraTickets)}
             {author(commit)}
           </CommitItem>
@@ -258,7 +262,7 @@ class Comparison extends React.Component<{
           <CommitItem key={commit.sha}>
             <FontAwesomeIcon icon={faArrowAltCircleRight} color="red" />
             {commitSha(commit)}
-            {firstLine(commit.commit.message)}
+            {commitInfo(commit.commit.message)}
             {author(commit)}
           </CommitItem>
         ))}
@@ -267,8 +271,12 @@ class Comparison extends React.Component<{
   }
 }
 
-function firstLine(commitMessage: string) {
-  return <CommitMessage>{commitMessage.split("\n", 2)[0]}</CommitMessage>;
+function commitInfo(commitMessage: string) {
+  return (
+    <CommitInfo>
+      <CommitMessage>{commitMessage.split("\n", 2)[0]}</CommitMessage>
+    </CommitInfo>
+  );
 }
 
 function commitSha(commit: Commit) {
@@ -315,8 +323,8 @@ function jiraTicketForCommit(
       </JiraTicket>
     );
   }
-  if (jiraKey && jiraTicketsState.jiraTickets[jiraKey]) {
-    const jiraTicket = jiraTicketsState.jiraTickets[jiraKey];
+  if (jiraKey && jiraTicketsState.loaded.jiraTickets[jiraKey]) {
+    const jiraTicket = jiraTicketsState.loaded.jiraTickets[jiraKey];
     const jiraStatus = jiraTicket.status.name;
     const ticketIsNowDone = isJiraTicketDone(jiraTicket);
     let hasFurtherCommits = false;

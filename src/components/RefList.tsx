@@ -54,8 +54,8 @@ class RefList extends React.Component<{
     </Container>
   );
 
-  private renderRefs(refs: RefsState & LoadedState) {
-    return refs.refs.map(ref => (
+  private renderRefs(refs: LoadedState<RefsState>) {
+    return refs.loaded.refs.map(ref => (
       <RefItem
         key={ref.name}
         selected={this.props.selectedRefName === ref.name}
@@ -81,11 +81,13 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
     if (currentRepo.refs.status !== "loaded") {
       return;
     }
-    const refIndex = currentRepo.refs.refs.findIndex(r => r.name === refName);
+    const refIndex = currentRepo.refs.loaded.refs.findIndex(
+      r => r.name === refName
+    );
     const compareToRefName =
-      refIndex === currentRepo.refs.refs.length - 1
-        ? currentRepo.refs.refs[refIndex - 1].name
-        : currentRepo.refs.refs[refIndex + 1].name;
+      refIndex === currentRepo.refs.loaded.refs.length - 1
+        ? currentRepo.refs.loaded.refs[refIndex - 1].name
+        : currentRepo.refs.loaded.refs[refIndex + 1].name;
     return dispatch(
       navigateToRefAction(
         currentRepo.owner,

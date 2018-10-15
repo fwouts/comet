@@ -54,7 +54,7 @@ export interface JiraTicketsState {
 export type Loadable<T, S = {}> = (
   | EmptyState
   | LoadingState
-  | (LoadedState & T)
+  | LoadedState<T>
   | FailedState) &
   S;
 
@@ -66,17 +66,26 @@ export const EMPTY_STATE: EmptyState = {
   status: "empty"
 };
 
-export interface LoadedState {
+export interface LoadedState<T> {
   readonly status: Loaded;
+  readonly loaded: T;
 }
 
 export interface LoadingState {
   readonly status: Loading;
 }
 
+export const LOADING_STATE: LoadingState = {
+  status: "loading"
+};
+
 export interface FailedState {
   readonly status: Failed;
 }
+
+export const FAILED_STATE: FailedState = {
+  status: "failed"
+};
 
 export type Empty = "empty";
 
