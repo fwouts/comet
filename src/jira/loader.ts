@@ -108,4 +108,5 @@ export interface GetCommitsResponse {
 export interface JiraCommit {
   id: string;
   authorTimestamp: string;
+  message: string;
 }

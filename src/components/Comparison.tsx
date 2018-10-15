@@ -280,11 +280,25 @@ function jiraTicketForCommit(
     const categoryDone =
       jiraTicket.status.categoryKey === "done" ||
       SPECIAL_DONE_STATUSES.has(jiraTicket.status.name);
-    const lastCommit = jiraTicket.commits[0];
-    // The ticket is only done in this particular branch if the last commit is included in this comparison.
-    // This means that if we can't find the last commit in this branch, then there are further commits.
-    const hasFurtherCommits =
-      lastCommit && allCommits.findIndex(c => c.sha === lastCommit.id) === -1;
+    let hasFurtherCommits = false;
+    if (jiraTicket.commits.length > 0) {
+      const lastCommits: JiraCommit[] = [];
+      for (const jiraCommit of jiraTicket.commits) {
+        if (lastCommits.length === 0) {
+          lastCommits.push(jiraCommit);
+        } else if (lastCommits[0].message === jiraCommit.message) {
+          // This is probably a bunch of cherry-picks.
+          lastCommits.push(jiraCommit);
+        } else {
+          break;
+        }
+      }
+      const lastCommitShas = new Set(lastCommits.map(c => c.id));
+      // The ticket is only done in this particular branch if the last commit is included in this comparison.
+      // This means that if we can't find one of the last commits in this branch, then there are further commits.
+      hasFurtherCommits =
+        allCommits.findIndex(c => lastCommitShas.has(c.sha)) === -1;
+    }
     return (
       <JiraTicket
         href={jiraLink(jiraKey)}
@@ -293,7 +307,7 @@ function jiraTicketForCommit(
       >
         {jiraKey} - {jiraStatus}
         {categoryDone && !hasFurtherCommits && "✓"}{" "}
-        {hasFurtherCommits && "(has further commits)"}
+        {hasFurtherCommits && "(more commits)"}
       </JiraTicket>
     );
   }
