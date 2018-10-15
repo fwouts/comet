@@ -1,6 +1,6 @@
 {
   "name": "comet",
-  "version": "0.2",
+  "version": "0.5",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.4",
