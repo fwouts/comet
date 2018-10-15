@@ -276,23 +276,24 @@ function jiraTicketForCommit(
   }
   if (jiraKey && jiraTicketsState.jiraTickets[jiraKey]) {
     const jiraTicket = jiraTicketsState.jiraTickets[jiraKey];
-    let isDone = false;
+    const jiraStatus = jiraTicket.status.name;
+    const categoryDone =
+      jiraTicket.status.categoryKey === "done" ||
+      SPECIAL_DONE_STATUSES.has(jiraTicket.status.name);
     const lastCommit = jiraTicket.commits[0];
-    if (
-      (jiraTicket.status.categoryKey === "done" ||
-        SPECIAL_DONE_STATUSES.has(jiraTicket.status.name)) &&
-      lastCommit
-    ) {
-      // The ticket is only done if the last commit is included in this comparison.
-      isDone = allCommits.findIndex(c => c.sha === lastCommit.id) !== -1;
-    }
+    // The ticket is only done in this particular branch if the last commit is included in this comparison.
+    // This means that if we can't find the last commit in this branch, then there are further commits.
+    const hasFurtherCommits =
+      lastCommit && allCommits.findIndex(c => c.sha === lastCommit.id) === -1;
     return (
       <JiraTicket
         href={jiraLink(jiraKey)}
         target="_blank"
-        backgroundColor={isDone ? "#2b2" : "#ccc"}
+        backgroundColor={categoryDone && !hasFurtherCommits ? "#2b2" : "#ccc"}
       >
-        {jiraKey} {isDone ? "✓" : " (has further commits)"}
+        {jiraKey} - {jiraStatus}
+        {categoryDone && !hasFurtherCommits && "✓"}{" "}
+        {hasFurtherCommits && "(has further commits)"}
       </JiraTicket>
     );
   }
