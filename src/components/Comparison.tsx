@@ -1,22 +1,23 @@
 import { faArrowAltCircleRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import assertNever from "assert-never";
 import React from "react";
 import ReactModal from "react-modal";
 import { connect } from "react-redux";
 import Select from "react-select";
 import { ClipLoader } from "react-spinners";
+import { JiraTicket } from "src/jira/loader";
 import { isJiraTicketDone, jiraTicketHasFurtherCommits } from "src/jira/status";
+import {
+  Dispatch,
+  navigateToRefAction,
+  toggleReleaseNotesAction
+} from "src/store/actions";
 import { findJiraTicket } from "src/store/helpers/find-ticket";
 import { generateReleaseNotes } from "src/store/helpers/release-notes";
 import styled from "styled-components";
 import { Commit, CompareRefsResult } from "../github/loader";
 import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "../jira/config";
-import { JiraTicket } from "../jira/loader";
-import {
-  Dispatch,
-  navigateToRefAction,
-  toggleReleaseNotesAction
-} from "../store/actions";
 import {
   ComparisonState,
   CurrentRepoState,
@@ -115,14 +116,60 @@ const CommitInfo = styled.div`
 
 const CommitMessage = styled.div``;
 
-const JiraTicket = styled.a<{ backgroundColor: string; loading?: boolean }>`
+const Ticket = styled.a`
   user-select: none;
-  background: ${props => props.backgroundColor};
-  color: #333;
-  margin: 0 8px;
-  padding: 4px 20px;
+  background: #333;
+  color: #ddd;
   border-radius: 8px;
+  font-size: 0.8em;
+  margin: 4px 0;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: row;
+  justify-content: stretch;
   text-decoration: none;
+`;
+
+const TicketSummary = styled.div`
+  padding: 4px 0 4px 8px;
+`;
+
+const TicketStatus = styled.div<{
+  status: "failed" | "loading" | "incomplete" | "done";
+}>`
+  user-select: none;
+  background: ${({ status }) => {
+    switch (status) {
+      case "failed":
+        return "#c00";
+      case "loading":
+        return "transparent";
+      case "incomplete":
+        return "#ccc";
+      case "done":
+        return "#2b2";
+      default:
+        throw assertNever(status);
+    }
+  }}
+  color: ${({ status }) => {
+    switch (status) {
+      case "failed":
+      case "loading":
+        return "#fff";
+      case "incomplete":
+      case "done":
+        return "#333";
+      default:
+        throw assertNever(status);
+    }
+  }}
+  margin-left: 8px;
+  border-radius: 0 8px 8px 0;
+  padding: 0 8px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 `;
 
 const Author = styled.div`
@@ -249,20 +296,22 @@ class Comparison extends React.Component<{
   ) {
     return (
       <>
-        {comparison.addedCommits.map(commit => (
-          <CommitItem key={commit.sha}>
-            <FontAwesomeIcon icon={faArrowAltCircleRight} color="green" />
-            {commitSha(commit)}
-            {commitInfo(commit.commit.message)}
-            {jiraTicketForCommit(comparison.addedCommits, commit, jiraTickets)}
-            {author(commit)}
-          </CommitItem>
-        ))}
+        {comparison.addedCommits.map(commit => {
+          const loadableJiraTicket = findJiraTicket(commit, jiraTickets);
+          return (
+            <CommitItem key={commit.sha}>
+              <FontAwesomeIcon icon={faArrowAltCircleRight} color="green" />
+              {commitSha(commit)}
+              {commitInfo(commit, loadableJiraTicket, comparison.addedCommits)}
+              {author(commit)}
+            </CommitItem>
+          );
+        })}
         {comparison.removedCommits.map(commit => (
           <CommitItem key={commit.sha}>
             <FontAwesomeIcon icon={faArrowAltCircleRight} color="red" />
             {commitSha(commit)}
-            {commitInfo(commit.commit.message)}
+            {commitInfo(commit)}
             {author(commit)}
           </CommitItem>
         ))}
@@ -271,12 +320,69 @@ class Comparison extends React.Component<{
   }
 }
 
-function commitInfo(commitMessage: string) {
+function commitInfo(
+  commit: Commit,
+  loadableJiraTicket: Loadable<JiraTicket, { key: string }> | null = null,
+  allCommits: Commit[] = []
+) {
   return (
     <CommitInfo>
-      <CommitMessage>{commitMessage.split("\n", 2)[0]}</CommitMessage>
+      <CommitMessage>{commit.commit.message.split("\n", 2)[0]}</CommitMessage>
+      {loadableJiraTicket !== null &&
+        jiraTicketForCommit(loadableJiraTicket, allCommits)}
     </CommitInfo>
   );
+}
+
+function jiraTicketForCommit(
+  loadableJiraTicket: Loadable<JiraTicket, { key: string }>,
+  allCommits: Commit[]
+) {
+  switch (loadableJiraTicket.status) {
+    case "empty":
+    case "failed":
+      return (
+        <Ticket href={jiraLink(loadableJiraTicket.key)} target="_blank">
+          <TicketSummary>{loadableJiraTicket.key}</TicketSummary>
+          <TicketStatus status="failed">✖</TicketStatus>
+        </Ticket>
+      );
+    case "loading":
+      return (
+        <Ticket href={jiraLink(loadableJiraTicket.key)} target="_blank">
+          <TicketSummary>{loadableJiraTicket.key}</TicketSummary>
+          <TicketStatus status="loading">
+            <ClipLoader size={12} color={"#fff"} />
+          </TicketStatus>
+        </Ticket>
+      );
+    case "loaded":
+      const jiraTicket = loadableJiraTicket.loaded;
+      const jiraStatus = jiraTicket.status.name;
+      const ticketIsNowDone = isJiraTicketDone(jiraTicket);
+      const hasFurtherCommits = jiraTicketHasFurtherCommits(
+        jiraTicket,
+        allCommits
+      );
+      return (
+        <Ticket href={jiraLink(jiraTicket.key)} target="_blank">
+          <TicketSummary>
+            {jiraTicket.key} - {jiraTicket.summary}
+          </TicketSummary>
+          <TicketStatus
+            status={
+              ticketIsNowDone && !hasFurtherCommits ? "done" : "incomplete"
+            }
+          >
+            {jiraStatus}
+            {ticketIsNowDone && !hasFurtherCommits && " ✓ "}{" "}
+            {hasFurtherCommits && " (more commits)"}
+          </TicketStatus>
+        </Ticket>
+      );
+    default:
+      throw assertNever(loadableJiraTicket);
+  }
 }
 
 function commitSha(commit: Commit) {
@@ -296,44 +402,6 @@ function author(commit: Commit) {
       <AuthorName>{commit.commit.author.name}</AuthorName>
       {commit.author && <AuthorAvatar src={commit.author.avatar_url} />}
     </Author>
-  );
-}
-
-function jiraTicketForCommit(
-  allCommits: Commit[],
-  commit: Commit,
-  jiraTicketsState: Loadable<JiraTicketsState>
-) {
-  const loadableJiraTicket = findJiraTicket(commit, jiraTicketsState);
-  if (loadableJiraTicket === null) {
-    return <></>;
-  }
-  if (loadableJiraTicket.status !== "loaded") {
-    return (
-      <JiraTicket
-        href={jiraLink(loadableJiraTicket.key)}
-        target="_blank"
-        backgroundColor="#eee"
-        loading={true}
-      >
-        {loadableJiraTicket.key} <ClipLoader size={12} />
-      </JiraTicket>
-    );
-  }
-  const jiraTicket = loadableJiraTicket.loaded;
-  const jiraStatus = jiraTicket.status.name;
-  const ticketIsNowDone = isJiraTicketDone(jiraTicket);
-  const hasFurtherCommits = jiraTicketHasFurtherCommits(jiraTicket, allCommits);
-  return (
-    <JiraTicket
-      href={jiraLink(jiraTicket.key)}
-      target="_blank"
-      backgroundColor={ticketIsNowDone && !hasFurtherCommits ? "#2b2" : "#ccc"}
-    >
-      {jiraTicket.key} - {jiraStatus}
-      {ticketIsNowDone && !hasFurtherCommits && " ✓ "}{" "}
-      {hasFurtherCommits && " (more commits)"}
-    </JiraTicket>
   );
 }
 
