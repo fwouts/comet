@@ -6,15 +6,15 @@ import ReactModal from "react-modal";
 import { connect } from "react-redux";
 import Select from "react-select";
 import { ClipLoader } from "react-spinners";
-import { JiraTicket } from "src/jira/loader";
-import { isJiraTicketDone, jiraTicketHasFurtherCommits } from "src/jira/status";
+import { JiraTicket } from "../jira/loader";
+import { isJiraTicketDone, jiraTicketHasFurtherCommits } from "../jira/status";
 import {
   Dispatch,
   navigateToRefAction,
   toggleReleaseNotesAction
-} from "src/store/actions";
-import { findJiraTicket } from "src/store/helpers/find-ticket";
-import { generateReleaseNotes } from "src/store/helpers/release-notes";
+} from "../store/actions";
+import { findJiraTicket } from "../store/helpers/find-ticket";
+import { generateReleaseNotes } from "../store/helpers/release-notes";
 import styled from "styled-components";
 import { Commit, CompareRefsResult } from "../github/loader";
 import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "../jira/config";

@@ -1,5 +1,5 @@
-import { JiraTicket } from "src/jira/loader";
-import { isJiraTicketDone } from "src/jira/status";
+import { JiraTicket } from "../../jira/loader";
+import { isJiraTicketDone } from "../../jira/status";
 import { ComparisonState } from "../state";
 
 export function generateReleaseNotes(comparison: ComparisonState): string {
