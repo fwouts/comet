@@ -26,7 +26,7 @@
     "immer": "^1.6.0",
     "lodash": "^4.17.11",
     "react": "^16.5.0",
-    "react-dom": "^16.5.0",
+    "react-dom": "^16.8.6",
     "react-fontawesome": "^1.6.1",
     "react-modal": "^3.8.1",
     "react-redux": "^5.0.7",
