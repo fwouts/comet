@@ -65,7 +65,7 @@ const navigateToRepoEpic = (
   action$: ActionsObservable<Action>
 ): Observable<RouterAction> =>
   action$.pipe(
-    ofType("NAVIGATE_TO_REPO"),
+    ofType<Action, NavigateToRepoAction>("NAVIGATE_TO_REPO"),
     mergeMap((action: NavigateToRepoAction) => {
       return of(push(producePath(action.owner, action.repo)));
     })
@@ -75,7 +75,7 @@ const triggerFetchRefsOnRepoUpdatedEpic = (
   action$: ActionsObservable<Action>
 ): Observable<Action> =>
   action$.pipe(
-    ofType("UPDATE_SELECTED_REPO"),
+    ofType<Action, UpdateSelectedRepoAction>("UPDATE_SELECTED_REPO"),
     mergeMap((action: UpdateSelectedRepoAction) => {
       return from([fetchRefsAction(action.owner, action.repo)]);
     })
@@ -86,7 +86,7 @@ const fetchRefsEpic = (
   state$: StateObservable<State>
 ): Observable<Action> =>
   action$.pipe(
-    ofType("FETCH_REFS"),
+    ofType<Action, FetchRefsAction>("FETCH_REFS"),
     mergeMap((action: FetchRefsAction) => {
       return fetchRefs(action.owner, action.repo, state$.value.currentRepo);
     })
@@ -128,7 +128,7 @@ const navigateToRefEpic = (
   action$: ActionsObservable<Action>
 ): Observable<RouterAction> =>
   action$.pipe(
-    ofType("NAVIGATE_TO_REF"),
+    ofType<Action, NavigateToRefAction>("NAVIGATE_TO_REF"),
     mergeMap((action: NavigateToRefAction) => {
       return of(
         push(
@@ -147,7 +147,7 @@ const triggerFetchCommitsOnRefSelectEpic = (
   action$: ActionsObservable<Action>
 ): Observable<Action> =>
   action$.pipe(
-    ofType("UPDATE_SELECTED_REF"),
+    ofType<Action, UpdateSelectedRefAction>("UPDATE_SELECTED_REF"),
     mergeMap((action: UpdateSelectedRefAction) => {
       return fetchComparison(
         action.owner,
@@ -201,7 +201,7 @@ const fetchJiraTicketsEpic = (
   action$: ActionsObservable<Action>
 ): Observable<Action> =>
   action$.pipe(
-    ofType("FETCH_JIRA_TICKETS"),
+    ofType<Action, FetchJiraTicketsAction>("FETCH_JIRA_TICKETS"),
     mergeMap((action: FetchJiraTicketsAction) =>
       fetchJiraTickets(action.commits)
     )

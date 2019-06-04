@@ -32,7 +32,9 @@ export async function loadTickets(
       })
     )
   );
-  return allTickets.reduce((acc, ticket, index) => {
+  return allTickets.reduce<{
+    [jiraKey: string]: JiraTicket;
+  }>((acc, ticket, index) => {
     if (ticket) {
       acc[jiraKeys[index]] = ticket;
     }

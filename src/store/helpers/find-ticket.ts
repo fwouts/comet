@@ -1,7 +1,7 @@
 import assertNever from "assert-never";
-import { Commit } from "src/github/loader";
-import { extractJiraKey } from "src/jira/key";
-import { JiraTicket } from "src/jira/loader";
+import { Commit } from "../../github/loader";
+import { extractJiraKey } from "../../jira/key";
+import { JiraTicket } from "../../jira/loader";
 import { jiraConfig } from "../../jira/config";
 import {
   EMPTY_STATE,
