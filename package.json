@@ -51,7 +51,7 @@
     "@types/react": "^16.8.19",
     "@types/react-dom": "^16.8.4",
     "react-scripts": "^3.0.1",
-    "ts-node-dev": "^1.0.0-pre.30",
+    "ts-node-dev": "^1.0.0-pre.40",
     "typescript": "^3.5.1"
   },
   "browserslist": {
