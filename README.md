@@ -1,7 +1,7 @@
 # Comet
 
-[![Build](https://img.shields.io/circleci/project/github/zenclabs/comet.svg)](https://circleci.com/gh/zenclabs/comet)
-[![Docker build](https://img.shields.io/docker/build/zenclabs/comet.svg)](https://hub.docker.com/r/zenclabs/comet/builds)
+[![Build](https://img.shields.io/circleci/project/github/airtasker/comet.svg)](https://circleci.com/gh/airtasker/comet)
+[![Docker build](https://img.shields.io/docker/build/airtasker/comet.svg)](https://hub.docker.com/r/airtasker/comet/builds)
 
 This is a dashboard to easily compare branches and tags for any GitHub repository.
 
@@ -11,7 +11,7 @@ This is a dashboard to easily compare branches and tags for any GitHub repositor
 - [Generate a GitHub API token](https://github.com/settings/tokens). Make sure to give it the `repo` permission, which is required to navigate through your repositories.
 - Run the following command to start the dashboard:
   ```
-  docker run -it -p 3080:80 -e GITHUB_TOKEN=....... zenclabs/comet
+  docker run -it -p 3080:80 -e GITHUB_TOKEN=....... airtasker/comet
   ```
 - Navigate to http://localhost:3080 to see the dashboard.
 
