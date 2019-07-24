@@ -234,7 +234,7 @@ class Comparison extends React.Component<{
               value={options.find(
                 o => o.value === this.props.comparison.compareToRefName
               )}
-              onChange={option =>
+              onChange={(option: any) =>
                 option &&
                 !(option instanceof Array) &&
                 this.props.compareToAnotherRef(

@@ -32,7 +32,7 @@ class RepoPicker extends React.Component<{
           placeholder="Select a GitHub repo"
           options={options}
           isOptionSelected={option => option.value === this.props.currentRepo}
-          onChange={option =>
+          onChange={(option: any) =>
             option &&
             !(option instanceof Array) &&
             this.props.navigateToRepo(option.value)
