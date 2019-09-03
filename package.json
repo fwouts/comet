@@ -25,7 +25,7 @@
     "history": "^4.9.0",
     "immer": "^3.2.0",
     "lodash": "^4.17.15",
-    "react": "^16.8.6",
+    "react": "^16.9.0",
     "react-dom": "^16.8.6",
     "react-fontawesome": "^1.6.1",
     "react-modal": "^3.9.1",
