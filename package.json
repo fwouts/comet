@@ -52,7 +52,7 @@
     "@types/react-dom": "^16.9.0",
     "react-scripts": "^3.0.1",
     "ts-node-dev": "^1.0.0-pre.42",
-    "typescript": "^3.5.3"
+    "typescript": "^3.6.2"
   },
   "browserslist": {
     "production": [
