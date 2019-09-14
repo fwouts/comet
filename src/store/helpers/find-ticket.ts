@@ -1,15 +1,15 @@
 import assertNever from "assert-never";
 import { Commit } from "../../github/loader";
+import { jiraConfig } from "../../jira/config";
 import { extractJiraKey } from "../../jira/key";
 import { JiraTicket } from "../../jira/loader";
-import { jiraConfig } from "../../jira/config";
 import {
   EMPTY_STATE,
   FAILED_STATE,
-  JiraTicketsState,
   Loadable,
   LOADING_STATE
-} from "../state";
+} from "../../store/loadable";
+import { JiraTicketsState } from "../comparison";
 
 export function findJiraTicket(
   commit: Commit,

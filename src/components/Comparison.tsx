@@ -1,31 +1,21 @@
 import { faArrowAltCircleRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import assertNever from "assert-never";
+import { observer } from "mobx-react";
 import React from "react";
 import ReactModal from "react-modal";
-import { connect } from "react-redux";
 import Select from "react-select";
 import { ClipLoader } from "react-spinners";
-import { JiraTicket } from "../jira/loader";
-import { isJiraTicketDone, jiraTicketHasFurtherCommits } from "../jira/status";
-import {
-  Dispatch,
-  navigateToRefAction,
-  toggleReleaseNotesAction
-} from "../store/actions";
-import { findJiraTicket } from "../store/helpers/find-ticket";
-import { generateReleaseNotes } from "../store/helpers/release-notes";
 import styled from "styled-components";
 import { Commit, CompareRefsResult } from "../github/loader";
 import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "../jira/config";
-import {
-  ComparisonState,
-  CurrentRepoState,
-  JiraTicketsState,
-  Loadable,
-  RefsState,
-  State
-} from "../store/state";
+import { JiraTicket } from "../jira/loader";
+import { isJiraTicketDone, jiraTicketHasFurtherCommits } from "../jira/status";
+import { JiraTicketsState } from "../store/comparison";
+import { findJiraTicket } from "../store/helpers/find-ticket";
+import { generateReleaseNotes } from "../store/helpers/release-notes";
+import { Loadable } from "../store/loadable";
+import { RepoState } from "../store/repo";
 import Spinner from "./Spinner";
 
 const Container = styled.div`
@@ -194,107 +184,91 @@ const AuthorAvatar = styled.img`
   margin-left: 8px;
 `;
 
-class Comparison extends React.Component<{
-  currentRepo: CurrentRepoState;
-  refs: Loadable<RefsState>;
-  selectedRefName: string;
-  comparison: ComparisonState;
-  compareToAnotherRef(
-    currentRepo: CurrentRepoState,
-    selectedRefName: string,
-    compareToRefName: string
-  ): void;
-  toggleReleaseNotes(): void;
-}> {
-  public render() {
-    const options =
-      this.props.refs.status === "loaded"
-        ? this.props.refs.loaded.refs
-            .filter(r => r.name !== this.props.selectedRefName)
-            .map(r => ({
-              value: r.name,
-              label: r.name
-            }))
-        : [];
-    if (options.length === 0) {
-      return <Container />;
-    }
-    return (
-      <Container>
-        <Header>
-          <SelectedBranch>
-            Comparing {this.props.selectedRefName} to{" "}
-          </SelectedBranch>
-          <CompareToBranch>
-            <Select
-              options={options}
-              isOptionSelected={option =>
-                option.value === this.props.comparison.compareToRefName
-              }
-              value={options.find(
-                o => o.value === this.props.comparison.compareToRefName
-              )}
-              onChange={(option: any) =>
-                option &&
-                !(option instanceof Array) &&
-                this.props.compareToAnotherRef(
-                  this.props.currentRepo,
-                  this.props.selectedRefName,
-                  option.value
-                )
-              }
-            />
-          </CompareToBranch>
-          {this.props.comparison.status === "loaded" && (
-            <ToggleReleaseNotesButton onClick={this.props.toggleReleaseNotes}>
-              {this.props.comparison.loaded.showReleaseNotes
-                ? "Hide release notes"
-                : "Show release notes"}
-            </ToggleReleaseNotesButton>
-          )}
-        </Header>
-        {this.props.comparison.status === "loaded" && (
-          <>
-            <ReactModal
-              isOpen={this.props.comparison.loaded.showReleaseNotes}
-              shouldCloseOnEsc={true}
-              shouldCloseOnOverlayClick={true}
-              onRequestClose={this.props.toggleReleaseNotes}
-              ariaHideApp={false}
-            >
-              <ReleaseNotes>
-                {generateReleaseNotes(this.props.comparison)}
-              </ReleaseNotes>
-            </ReactModal>
-            <Description>
-              {this.props.comparison.loaded.result.aheadBy} commits added.
-              <br />
-              {this.props.comparison.loaded.result.behindBy} commits removed.
-              {this.props.comparison.loaded.result.hadToOmitCommits && (
-                <>
-                  <br />
-                  <br />
-                  <b>
-                    Only showing a subset of commits because of limitations in
-                    GitHub API.
-                  </b>
-                </>
-              )}
-            </Description>
-            <CommitList>
-              {this.renderComparisonList(
-                this.props.comparison.loaded.result,
-                this.props.comparison.loaded.jiraTickets
-              )}
-            </CommitList>
-          </>
-        )}
-        {this.props.comparison.status === "loading" && Spinner}
-      </Container>
-    );
+export const Comparison: React.FC<{
+  state: RepoState;
+}> = observer(props => {
+  const options =
+    props.state.refs.status === "loaded"
+      ? props.state.refs.loaded.refs
+          .filter(r => r.name !== props.state.selectedRefName)
+          .map(r => ({
+            value: r.name,
+            label: r.name
+          }))
+      : [];
+  if (options.length === 0 || !props.state.comparison) {
+    return <Container />;
   }
+  const comparison = props.state.comparison;
+  return (
+    <Container>
+      <Header>
+        <SelectedBranch>
+          Comparing {props.state.selectedRefName} to{" "}
+        </SelectedBranch>
+        <CompareToBranch>
+          <Select
+            options={options}
+            isOptionSelected={option =>
+              option.value === comparison.compareToRefName
+            }
+            value={options.find(o => o.value === comparison.compareToRefName)}
+            onChange={(option: any) =>
+              option &&
+              !(option instanceof Array) &&
+              props.state.compareToAnotherRef(option.value)
+            }
+          />
+        </CompareToBranch>
+        {comparison.result.status === "loaded" && (
+          <ToggleReleaseNotesButton
+            onClick={() => comparison.toggleReleaseNotes()}
+          >
+            {comparison.showReleaseNotes
+              ? "Hide release notes"
+              : "Show release notes"}
+          </ToggleReleaseNotesButton>
+        )}
+      </Header>
+      {comparison.result.status === "loaded" && (
+        <>
+          <ReactModal
+            isOpen={comparison.showReleaseNotes}
+            shouldCloseOnEsc={true}
+            shouldCloseOnOverlayClick={true}
+            onRequestClose={() => comparison.toggleReleaseNotes()}
+            ariaHideApp={false}
+          >
+            <ReleaseNotes>{generateReleaseNotes(comparison)}</ReleaseNotes>
+          </ReactModal>
+          <Description>
+            {comparison.result.loaded.aheadBy} commits added.
+            <br />
+            {comparison.result.loaded.behindBy} commits removed.
+            {comparison.result.loaded.hadToOmitCommits && (
+              <>
+                <br />
+                <br />
+                <b>
+                  Only showing a subset of commits because of limitations in
+                  GitHub API.
+                </b>
+              </>
+            )}
+          </Description>
+          <CommitList>
+            {renderComparisonList(
+              comparison.result.loaded,
+              comparison.jiraTickets
+            )}
+          </CommitList>
+        </>
+      )}
+      {comparison.result.status === "loading" && Spinner}
+    </Container>
+  );
 
-  private renderComparisonList(
+  function renderComparisonList(
     comparison: CompareRefsResult,
     jiraTickets: Loadable<JiraTicketsState>
   ) {
@@ -322,7 +296,7 @@ class Comparison extends React.Component<{
       </>
     );
   }
-}
+});
 
 function commitInfo(
   commit: Commit,
@@ -419,41 +393,3 @@ function jiraLink(jiraKey: string) {
   }
   return `${jiraConfig.JIRA_HOST}/browse/${jiraKey}`;
 }
-
-const mapStateToProps = (state: State) => {
-  if (
-    !state.currentRepo ||
-    !state.currentRepo.selectedRefName ||
-    !state.currentRepo.comparison
-  ) {
-    throw new Error(`Invalid state`);
-  }
-  return {
-    currentRepo: state.currentRepo,
-    refs: state.currentRepo.refs,
-    selectedRefName: state.currentRepo.selectedRefName,
-    comparison: state.currentRepo.comparison
-  };
-};
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  compareToAnotherRef: (
-    currentRepo: CurrentRepoState,
-    selectedRefName: string,
-    compareToRefName: string
-  ) =>
-    dispatch(
-      navigateToRefAction(
-        currentRepo.owner,
-        currentRepo.repo,
-        selectedRefName,
-        compareToRefName
-      )
-    ),
-  toggleReleaseNotes: () => dispatch(toggleReleaseNotesAction())
-});
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(Comparison);

@@ -1,6 +1,6 @@
 import Octokit from "@octokit/rest";
 import * as config from "../config";
-import { Branch, Ref, Tag } from "../store/state";
+import { Branch, Ref, Tag } from "../store/repo";
 
 const octokit = new Octokit();
 octokit.authenticate({

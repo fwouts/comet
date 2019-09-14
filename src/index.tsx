@@ -1,70 +1,35 @@
-import { connectRouter, routerMiddleware } from "connected-react-router";
-import { createBrowserHistory, Location } from "history";
 import React from "react";
 import ReactDOM from "react-dom";
-import { Provider } from "react-redux";
-import { applyMiddleware, compose, createStore } from "redux";
-import { createEpicMiddleware } from "redux-observable";
-import App from "./components/App";
+import { App } from "./components/App";
 import "./index.css";
 import registerServiceWorker from "./registerServiceWorker";
-import { parsePath } from "./routing";
-import {
-  Action,
-  updateSelectedRefAction,
-  updateSelectedRepoAction
-} from "./store/actions";
-import { rootEpic } from "./store/epics";
-import { rootReducer } from "./store/reducer";
-import { State } from "./store/state";
+import { Router, RouterContext } from "./routing";
+import { AppState } from "./store/app";
+import "./store/config";
 
-const devToolsExtension = (window as any).devToolsExtension;
-
-const epicMiddleware = createEpicMiddleware<Action, Action, State>();
-const history = createBrowserHistory();
-const storeEnhancer = applyMiddleware(
-  routerMiddleware(history),
-  epicMiddleware
-);
-const store = createStore(
-  connectRouter(history)(rootReducer),
-  devToolsExtension
-    ? compose(
-        storeEnhancer,
-        devToolsExtension()
-      )
-    : storeEnhancer
-);
-epicMiddleware.run(rootEpic);
-
-ReactDOM.render(
-  <Provider store={store}>
-    <App />
-  </Provider>,
-  document.getElementById("root")
-);
-registerServiceWorker();
-
-const locationListener = (location: Location) => {
-  const path = parsePath(location.pathname);
+const app = new AppState();
+app.fetchRepos();
+const router = new Router();
+router.listen(path => {
   if (path) {
     switch (path.kind) {
       case "repo-only":
-        store.dispatch(updateSelectedRepoAction(path.owner, path.repo));
+        app.selectRepo(path.owner, path.repo);
         break;
       case "repo-and-comparison":
-        store.dispatch(updateSelectedRepoAction(path.owner, path.repo));
-        store.dispatch(
-          updateSelectedRefAction(
-            path.owner,
-            path.repo,
-            path.selectedRefName,
-            path.compareToRefName
-          )
-        );
+        app.selectRepo(path.owner, path.repo).then(repo => {
+          repo.selectRef(path.selectedRefName);
+          repo.compareToAnotherRef(path.compareToRefName);
+        });
         break;
     }
   }
-};
-history.listen(locationListener);
-locationListener(history.location);
+});
+
+ReactDOM.render(
+  <RouterContext.Provider value={router}>
+    <App state={app} />
+  </RouterContext.Provider>,
+  document.getElementById("root")
+);
+registerServiceWorker();
