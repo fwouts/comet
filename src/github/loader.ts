@@ -1,11 +1,11 @@
 import Octokit from "@octokit/rest";
-import * as config from "../config";
 import { Branch, Ref, Tag } from "../store/state";
+import { githubConfig } from "./config";
 
 const octokit = new Octokit();
 octokit.authenticate({
   type: "token",
-  token: config.GITHUB_TOKEN
+  token: githubConfig().apiToken
 });
 
 /**
