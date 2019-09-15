@@ -211,11 +211,12 @@ export const Comparison: React.FC<{
               option.value === comparison.compareToRefName
             }
             value={options.find(o => o.value === comparison.compareToRefName)}
-            onChange={(option: any) =>
-              option &&
-              !(option instanceof Array) &&
-              state.compareToAnotherRef(option.value)
-            }
+            onChange={(option: any) => {
+              if (!option || option instanceof Array) {
+                return;
+              }
+              state.compareToAnotherRef(option.value);
+            }}
           />
         </CompareToBranch>
         {comparison.result.status === "loaded" && (
