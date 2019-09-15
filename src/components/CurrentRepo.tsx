@@ -15,9 +15,9 @@ const RootContainer = styled.div`
 
 export const CurrentRepo: React.FC<{
   state: RepoState;
-}> = observer(props => (
+}> = observer(({ state }) => (
   <RootContainer>
-    <RefList state={props.state} />
-    <Comparison state={props.state} />
+    <RefList state={state} />
+    <Comparison state={state} />
   </RootContainer>
 ));

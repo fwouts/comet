@@ -37,13 +37,13 @@ const RefItem = styled.li<{
 
 export const RefList: React.FC<{
   state: RepoState;
-}> = observer(props => {
+}> = observer(({ state }) => {
   const router = useContext(RouterContext);
 
   return (
     <Container>
-      {props.state.refs.status === "loaded" && renderRefs(props.state.refs)}
-      {props.state.refs.status === "loading" && Spinner}
+      {state.refs.status === "loaded" && renderRefs(state.refs)}
+      {state.refs.status === "loading" && Spinner}
     </Container>
   );
 
@@ -51,7 +51,7 @@ export const RefList: React.FC<{
     return refs.loaded.refs.map(ref => (
       <RefItem
         key={ref.name}
-        selected={props.state.selectedRefName === ref.name}
+        selected={state.selectedRefName === ref.name}
         onClick={() => selectRef(ref.name)}
       >
         <FontAwesomeIcon icon={ref.kind === "branch" ? faCodeBranch : faTag} />{" "}
@@ -61,20 +61,15 @@ export const RefList: React.FC<{
   }
 
   function selectRef(refName: string) {
-    if (props.state.refs.status !== "loaded") {
+    if (state.refs.status !== "loaded") {
       return;
     }
-    const refs = props.state.refs.loaded.refs;
+    const refs = state.refs.loaded.refs;
     const refIndex = refs.findIndex(r => r.name === refName);
     const compareToRefName =
       refIndex === refs.length - 1
         ? refs[refIndex - 1].name
         : refs[refIndex + 1].name;
-    return router.navigate(
-      props.state.owner,
-      props.state.repo,
-      refName,
-      compareToRefName
-    );
+    return router.navigate(state.owner, state.repo, refName, compareToRefName);
   }
 });

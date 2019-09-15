@@ -186,26 +186,24 @@ const AuthorAvatar = styled.img`
 
 export const Comparison: React.FC<{
   state: RepoState;
-}> = observer(props => {
+}> = observer(({ state }) => {
   const options =
-    props.state.refs.status === "loaded"
-      ? props.state.refs.loaded.refs
-          .filter(r => r.name !== props.state.selectedRefName)
+    state.refs.status === "loaded"
+      ? state.refs.loaded.refs
+          .filter(r => r.name !== state.selectedRefName)
           .map(r => ({
             value: r.name,
             label: r.name
           }))
       : [];
-  if (options.length === 0 || !props.state.comparison) {
+  if (options.length === 0 || !state.comparison) {
     return <Container />;
   }
-  const comparison = props.state.comparison;
+  const comparison = state.comparison;
   return (
     <Container>
       <Header>
-        <SelectedBranch>
-          Comparing {props.state.selectedRefName} to{" "}
-        </SelectedBranch>
+        <SelectedBranch>Comparing {state.selectedRefName} to </SelectedBranch>
         <CompareToBranch>
           <Select
             options={options}
@@ -216,7 +214,7 @@ export const Comparison: React.FC<{
             onChange={(option: any) =>
               option &&
               !(option instanceof Array) &&
-              props.state.compareToAnotherRef(option.value)
+              state.compareToAnotherRef(option.value)
             }
           />
         </CompareToBranch>

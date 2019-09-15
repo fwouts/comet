@@ -12,18 +12,18 @@ const Container = styled.div`
 
 export const RepoPicker: React.FC<{
   state: AppState;
-}> = observer(props => {
+}> = observer(({ state }) => {
   const router = useContext(RouterContext);
-  if (props.state.suggestedRepositories.status !== "loaded") {
+  if (state.suggestedRepositories.status !== "loaded") {
     return Spinner;
   }
-  const suggested = props.state.suggestedRepositories.loaded;
+  const suggested = state.suggestedRepositories.loaded;
   const options = suggested.map(r => ({
     value: `${r.owner}/${r.repo}`,
     label: `${r.owner}/${r.repo}`
   }));
-  const currentRepo = props.state.currentRepo
-    ? `${props.state.currentRepo.owner}/${props.state.currentRepo.repo}`
+  const currentRepo = state.currentRepo
+    ? `${state.currentRepo.owner}/${state.currentRepo.repo}`
     : undefined;
   const selectedOption = options.find(option => option.value === currentRepo);
   return (

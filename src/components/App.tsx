@@ -12,9 +12,9 @@ const Container = styled.div`
 
 export const App: React.FC<{
   state: AppState;
-}> = observer(props => (
+}> = observer(({ state }) => (
   <Container>
-    <RepoPicker state={props.state} />
-    {props.state.currentRepo && <CurrentRepo state={props.state.currentRepo} />}
+    <RepoPicker state={state} />
+    {state.currentRepo && <CurrentRepo state={state.currentRepo} />}
   </Container>
 ));
