@@ -6,6 +6,9 @@ import ReactModal from "react-modal";
 import { connect } from "react-redux";
 import Select from "react-select";
 import { ClipLoader } from "react-spinners";
+import styled from "styled-components";
+import { Commit, CompareRefsResult } from "../github/loader";
+import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "../jira/config";
 import { JiraTicket } from "../jira/loader";
 import { isJiraTicketDone, jiraTicketHasFurtherCommits } from "../jira/status";
 import {
@@ -15,9 +18,6 @@ import {
 } from "../store/actions";
 import { findJiraTicket } from "../store/helpers/find-ticket";
 import { generateReleaseNotes } from "../store/helpers/release-notes";
-import styled from "styled-components";
-import { Commit, CompareRefsResult } from "../github/loader";
-import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "../jira/config";
 import {
   ComparisonState,
   CurrentRepoState,
@@ -414,10 +414,11 @@ function author(commit: Commit) {
 }
 
 function jiraLink(jiraKey: string) {
-  if (!jiraConfig) {
+  const config = jiraConfig();
+  if (!config) {
     throw new Error(HELPFUL_JIRA_ERROR_MESSAGE);
   }
-  return `${jiraConfig.JIRA_HOST}/browse/${jiraKey}`;
+  return `${config.host}/browse/${jiraKey}`;
 }
 
 const mapStateToProps = (state: State) => {

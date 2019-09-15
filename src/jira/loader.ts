@@ -43,16 +43,15 @@ export async function loadTickets(
 }
 
 export async function loadTicket(jiraKey: string): Promise<JiraTicket> {
-  if (!jiraConfig) {
+  const config = jiraConfig();
+  if (!config) {
     throw new Error(HELPFUL_JIRA_ERROR_MESSAGE);
   }
   const headers = {
-    Authorization: `Basic ${btoa(
-      `${jiraConfig.JIRA_EMAIL}:${jiraConfig.JIRA_API_TOKEN}`
-    )}`
+    Authorization: `Basic ${btoa(`${config.email}:${config.apiToken}`)}`
   };
   const getIssueResponse = await axios.get(
-    `${jiraConfig.JIRA_PROXIED_HOST}/rest/api/3/issue/${jiraKey}`,
+    `/jira/rest/api/3/issue/${jiraKey}`,
     {
       headers
     }
@@ -60,9 +59,7 @@ export async function loadTicket(jiraKey: string): Promise<JiraTicket> {
   const getIssueData = getIssueResponse.data as GetIssueResponse;
   const issueId = getIssueResponse.data.id;
   const getCommitsResponse = await axios.get(
-    `${
-      jiraConfig.JIRA_PROXIED_HOST
-    }/rest/dev-status/1.0/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=repository`,
+    `/jira/rest/dev-status/1.0/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=repository`,
     {
       headers
     }
