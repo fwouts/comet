@@ -1,5 +1,5 @@
 import { action, observable } from "mobx";
-import { loadRefs } from "../github/loader";
+import { GitHubLoader } from "../github/interface";
 import { AppState } from "./app";
 import { ComparisonState } from "./comparison";
 import { EMPTY_STATE, FAILED_STATE, Loadable, LOADING_STATE } from "./loadable";
@@ -10,6 +10,7 @@ export class RepoState {
   @observable comparison: ComparisonState | null = null;
 
   constructor(
+    private readonly githubLoader: GitHubLoader,
     readonly app: AppState,
     readonly owner: string,
     readonly repo: string
@@ -18,7 +19,7 @@ export class RepoState {
   async fetchRefs() {
     try {
       this.updateRefs(LOADING_STATE);
-      const refs = await loadRefs(this.owner, this.repo);
+      const refs = await this.githubLoader.loadRefs(this.owner, this.repo);
       this.updateRefs({
         status: "loaded",
         loaded: { refs }
@@ -44,7 +45,12 @@ export class RepoState {
     if (!this.selectedRefName) {
       return;
     }
-    this.comparison = new ComparisonState(this, this.selectedRefName, refName);
+    this.comparison = new ComparisonState(
+      this.githubLoader,
+      this,
+      this.selectedRefName,
+      refName
+    );
     await this.comparison.fetchResult();
   }
 }

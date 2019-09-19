@@ -1,5 +1,5 @@
 import { action, observable } from "mobx";
-import { Commit, compareRefs, CompareRefsResult } from "../github/loader";
+import { Commit, CompareRefsResult, GitHubLoader } from "../github/interface";
 import { extractJiraKey } from "../jira/key";
 import { JiraTicket, loadTickets } from "../jira/loader";
 import { EMPTY_STATE, FAILED_STATE, Loadable, LOADING_STATE } from "./loadable";
@@ -11,6 +11,7 @@ export class ComparisonState {
   @observable showReleaseNotes = false;
 
   constructor(
+    private readonly githubLoader: GitHubLoader,
     readonly repo: RepoState,
     readonly refName: string,
     readonly compareToRefName: string
@@ -24,7 +25,7 @@ export class ComparisonState {
   async fetchResult() {
     try {
       this.updateResult(LOADING_STATE);
-      const result = await compareRefs(
+      const result = await this.githubLoader.compareRefs(
         this.repo.owner,
         this.repo.repo,
         this.compareToRefName,
