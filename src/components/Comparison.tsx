@@ -387,8 +387,9 @@ function author(commit: Commit) {
 }
 
 function jiraLink(jiraKey: string) {
-  if (!jiraConfig) {
+  const config = jiraConfig();
+  if (!config) {
     throw new Error(HELPFUL_JIRA_ERROR_MESSAGE);
   }
-  return `${jiraConfig.JIRA_HOST}/browse/${jiraKey}`;
+  return `${config.host}/browse/${jiraKey}`;
 }

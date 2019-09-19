@@ -19,6 +19,20 @@ This is a dashboard to easily compare branches and tags for any GitHub repositor
 
 If you'd like to automatically see the status of associated Jira tickets, you'll need to pass
 a few additional environment variables through Docker:
+
 - `JIRA_HOST`, for example if you use Jira Cloud `https://yourproject.atlassian.net`.
 - `JIRA_EMAIL`, which is your Jira account.
 - `JIRA_API_TOKEN`, see [official instructions](https://confluence.atlassian.com/cloud/api-tokens-938839638.html).
+
+## Development
+
+In order to run Comet in development mode (via `yarn start`), you will need to have the following environment variables set:
+
+```
+export REACT_APP_GITHUB_TOKEN=...
+
+# If you would like to enable Jira integration too.
+export REACT_APP_JIRA_HOST=...
+export REACT_APP_JIRA_EMAIL=...
+export REACT_APP_JIRA_TOKEN=...
+```

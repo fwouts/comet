@@ -15,7 +15,8 @@ export function findJiraTicket(
   commit: Commit,
   jiraTicketsState: Loadable<JiraTicketsState>
 ): Loadable<JiraTicket, { key: string }> | null {
-  if (!jiraConfig) {
+  const config = jiraConfig();
+  if (!config) {
     return null;
   }
   const key = extractJiraKey(commit.commit.message);
