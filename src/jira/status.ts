@@ -1,4 +1,4 @@
-import { Commit } from "../github/loader";
+import { Commit } from "../github/interface";
 import { JiraCommit, JiraTicket, SPECIAL_DONE_STATUSES } from "./loader";
 
 export function isJiraTicketDone(jiraTicket: JiraTicket) {

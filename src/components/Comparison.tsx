@@ -7,7 +7,7 @@ import ReactModal from "react-modal";
 import Select from "react-select";
 import { ClipLoader } from "react-spinners";
 import styled from "styled-components";
-import { Commit, CompareRefsResult } from "../github/loader";
+import { Commit, CompareRefsResult } from "../github/interfaces";
 import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "../jira/config";
 import { JiraTicket } from "../jira/loader";
 import { isJiraTicketDone, jiraTicketHasFurtherCommits } from "../jira/status";
