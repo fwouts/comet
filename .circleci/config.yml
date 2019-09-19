@@ -9,3 +9,16 @@ jobs:
       - run:
           name: Build Docker image
           command: docker build .
+  test:
+    docker:
+      - image: circleci/node:10.11.0-browsers
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run: yarn install
+      - run: yarn test
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - node_modules
