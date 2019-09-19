@@ -1,8 +1,10 @@
 version: 2.1
+defaults: &defaults
+  docker:
+    - image: circleci/node:11-browsers
 jobs:
   build:
-    docker:
-      - image: circleci/node:10.11.0-browsers
+    <<: *defaults
     steps:
       - checkout
       - setup_remote_docker
@@ -10,8 +12,7 @@ jobs:
           name: Build Docker image
           command: docker build .
   test:
-    docker:
-      - image: circleci/node:10.11.0-browsers
+    <<: *defaults
     steps:
       - checkout
       - restore_cache:
