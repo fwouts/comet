@@ -6,7 +6,7 @@ import { ComparisonState } from "./comparison";
 import { EMPTY_STATE, FAILED_STATE, Loadable, LOADING_STATE } from "./loadable";
 
 export class RepoState {
-  @observable refs: Loadable<RefsState> = EMPTY_STATE;
+  @observable refs: Loadable<Ref[]> = EMPTY_STATE;
   @observable selectedRefName: string | null = null;
   @observable comparison: ComparisonState | null = null;
 
@@ -24,7 +24,7 @@ export class RepoState {
       const refs = await this.githubLoader.loadRefs(this.owner, this.repo);
       this.updateRefs({
         status: "loaded",
-        loaded: { refs }
+        loaded: refs
       });
     } catch (e) {
       this.updateRefs(FAILED_STATE);
@@ -32,7 +32,7 @@ export class RepoState {
   }
 
   @action
-  private updateRefs(refs: Loadable<RefsState>) {
+  private updateRefs(refs: Loadable<Ref[]>) {
     this.refs = refs;
   }
 
@@ -56,10 +56,6 @@ export class RepoState {
     );
     await this.comparison.fetchResult();
   }
-}
-
-export interface RefsState {
-  readonly refs: Ref[];
 }
 
 export type Ref = Branch | Tag;

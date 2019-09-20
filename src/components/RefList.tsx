@@ -5,7 +5,7 @@ import React, { useContext } from "react";
 import styled from "styled-components";
 import { RouterContext } from "../routing";
 import { LoadedState } from "../store/loadable";
-import { RefsState, RepoState } from "../store/repo";
+import { Ref, RepoState } from "../store/repo";
 import Spinner from "./Spinner";
 
 const Container = styled.ul`
@@ -47,8 +47,8 @@ export const RefList: React.FC<{
     </Container>
   );
 
-  function renderRefs(refs: LoadedState<RefsState>) {
-    return refs.loaded.refs.map(ref => (
+  function renderRefs(refs: LoadedState<Ref[]>) {
+    return refs.loaded.map(ref => (
       <RefItem
         key={ref.name}
         selected={state.selectedRefName === ref.name}
@@ -64,7 +64,7 @@ export const RefList: React.FC<{
     if (state.refs.status !== "loaded") {
       return;
     }
-    const refs = state.refs.loaded.refs;
+    const refs = state.refs.loaded;
     const refIndex = refs.findIndex(r => r.name === refName);
     const compareToRefName =
       refIndex === refs.length - 1

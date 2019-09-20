@@ -189,7 +189,7 @@ export const Comparison: React.FC<{
 }> = observer(({ state }) => {
   const options =
     state.refs.status === "loaded"
-      ? state.refs.loaded.refs
+      ? state.refs.loaded
           .filter(r => r.name !== state.selectedRefName)
           .map(r => ({
             value: r.name,
