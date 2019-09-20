@@ -20,7 +20,7 @@ describe("AppState", () => {
           repo: "proxay"
         }
       ];
-      githubLoader.loadSuggestedRepos.mockReturnValue(Promise.resolve(repos));
+      githubLoader.loadSuggestedRepos.mockResolvedValue(repos);
 
       expect(app.suggestedRepositories).toEqual({
         status: "empty"
