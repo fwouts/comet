@@ -1,5 +1,6 @@
 import { action, observable } from "mobx";
 import { GitHubLoader, Repo } from "../github/interface";
+import { JiraLoader } from "../jira/interface";
 import { EMPTY_STATE, FAILED_STATE, Loadable, LOADING_STATE } from "./loadable";
 import { RepoState } from "./repo";
 
@@ -7,7 +8,10 @@ export class AppState {
   @observable suggestedRepositories: Loadable<Repo[]> = EMPTY_STATE;
   @observable currentRepo: RepoState | null = null;
 
-  constructor(private readonly githubLoader: GitHubLoader) {}
+  constructor(
+    private readonly githubLoader: GitHubLoader,
+    private readonly jiraLoader: JiraLoader | null
+  ) {}
 
   async fetchRepos() {
     this.updateSuggestedRepositories(LOADING_STATE);
@@ -36,7 +40,13 @@ export class AppState {
     ) {
       return this.currentRepo;
     }
-    this.currentRepo = new RepoState(this.githubLoader, this, owner, repo);
+    this.currentRepo = new RepoState(
+      this.githubLoader,
+      this.jiraLoader,
+      this,
+      owner,
+      repo
+    );
     await this.currentRepo.fetchRefs();
     return this.currentRepo;
   }

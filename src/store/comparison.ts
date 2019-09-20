@@ -1,7 +1,7 @@
 import { action, observable } from "mobx";
 import { Commit, CompareRefsResult, GitHubLoader } from "../github/interface";
+import { JiraLoader, JiraTicket } from "../jira/interface";
 import { extractJiraKey } from "../jira/key";
-import { JiraTicket, loadTickets } from "../jira/loader";
 import { EMPTY_STATE, FAILED_STATE, Loadable, LOADING_STATE } from "./loadable";
 import { RepoState } from "./repo";
 
@@ -12,6 +12,7 @@ export class ComparisonState {
 
   constructor(
     private readonly githubLoader: GitHubLoader,
+    private readonly jiraLoader: JiraLoader | null,
     readonly repo: RepoState,
     readonly refName: string,
     readonly compareToRefName: string
@@ -36,10 +37,8 @@ export class ComparisonState {
         loaded: result
       });
       this.updateJiraTickets(EMPTY_STATE);
-
-      // Note: We don't await here, because this may fail if Jira isn't configured.
-      this.fetchJiraTickets();
-      // TODO: Fetch Jira tickets.
+      // Note: We don't await here, because Jira failing isn't a critical issue.
+      this.fetchJiraTickets().catch(console.error);
     } catch (e) {
       this.updateResult(FAILED_STATE);
     }
@@ -51,12 +50,16 @@ export class ComparisonState {
   }
 
   async fetchJiraTickets() {
+    if (!this.jiraLoader) {
+      return;
+    }
     if (this.result.status !== "loaded") {
       return;
     }
     try {
       this.updateJiraTickets(LOADING_STATE);
       const jiraTickets = await loadJiraTickets(
+        this.jiraLoader,
         this.result.loaded.addedCommits
       );
       this.updateJiraTickets({
@@ -75,13 +78,14 @@ export class ComparisonState {
 }
 
 async function loadJiraTickets(
+  jiraLoader: JiraLoader,
   commits: Commit[]
 ): Promise<{ [jiraKey: string]: JiraTicket }> {
   const jiraKeys = commits.map(commit => extractJiraKey(commit.commit.message));
   const uniqueJiraKeys = new Set(jiraKeys.filter(k => k !== null)) as Set<
     string
   >;
-  return loadTickets(Array.from(uniqueJiraKeys));
+  return jiraLoader.loadTickets(Array.from(uniqueJiraKeys));
 }
 
 export interface JiraTicketsState {

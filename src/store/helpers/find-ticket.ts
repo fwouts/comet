@@ -1,8 +1,7 @@
 import assertNever from "assert-never";
 import { Commit } from "../../github/interface";
-import { jiraConfig } from "../../jira/config";
+import { JiraTicket } from "../../jira/interface";
 import { extractJiraKey } from "../../jira/key";
-import { JiraTicket } from "../../jira/loader";
 import {
   EMPTY_STATE,
   FAILED_STATE,
@@ -15,10 +14,6 @@ export function findJiraTicket(
   commit: Commit,
   jiraTicketsState: Loadable<JiraTicketsState>
 ): Loadable<JiraTicket, { key: string }> | null {
-  const config = jiraConfig();
-  if (!config) {
-    return null;
-  }
   const key = extractJiraKey(commit.commit.message);
   if (!key) {
     return null;

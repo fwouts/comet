@@ -1,4 +1,4 @@
-import { JiraTicket } from "../../jira/loader";
+import { JiraTicket } from "../../jira/interface";
 import { isJiraTicketDone } from "../../jira/status";
 import { ComparisonState } from "../comparison";
 
