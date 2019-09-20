@@ -1,7 +1,6 @@
 import { action, observable } from "mobx";
 import { GitHubLoader } from "../github/interface";
 import { JiraLoader } from "../jira/interface";
-import { AppState } from "./app";
 import { ComparisonState } from "./comparison";
 import { EMPTY_STATE, FAILED_STATE, Loadable, LOADING_STATE } from "./loadable";
 
@@ -13,7 +12,6 @@ export class RepoState {
   constructor(
     private readonly githubLoader: GitHubLoader,
     private readonly jiraLoader: JiraLoader | null,
-    readonly app: AppState,
     readonly owner: string,
     readonly repo: string
   ) {}
@@ -50,7 +48,8 @@ export class RepoState {
     this.comparison = new ComparisonState(
       this.githubLoader,
       this.jiraLoader,
-      this,
+      this.owner,
+      this.repo,
       this.selectedRefName,
       refName
     );

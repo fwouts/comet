@@ -43,7 +43,6 @@ export class AppState {
     this.currentRepo = new RepoState(
       this.githubLoader,
       this.jiraLoader,
-      this,
       owner,
       repo
     );

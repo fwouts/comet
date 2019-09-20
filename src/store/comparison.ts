@@ -3,7 +3,6 @@ import { Commit, CompareRefsResult, GitHubLoader } from "../github/interface";
 import { JiraLoader, JiraTicket } from "../jira/interface";
 import { extractJiraKey } from "../jira/key";
 import { EMPTY_STATE, FAILED_STATE, Loadable, LOADING_STATE } from "./loadable";
-import { RepoState } from "./repo";
 
 export class ComparisonState {
   @observable result: Loadable<CompareRefsResult> = EMPTY_STATE;
@@ -13,7 +12,8 @@ export class ComparisonState {
   constructor(
     private readonly githubLoader: GitHubLoader,
     private readonly jiraLoader: JiraLoader | null,
-    readonly repo: RepoState,
+    private owner: string,
+    private repo: string,
     readonly refName: string,
     readonly compareToRefName: string
   ) {}
@@ -27,8 +27,8 @@ export class ComparisonState {
     try {
       this.updateResult(LOADING_STATE);
       const result = await this.githubLoader.compareRefs(
-        this.repo.owner,
-        this.repo.repo,
+        this.owner,
+        this.repo,
         this.compareToRefName,
         this.refName
       );
