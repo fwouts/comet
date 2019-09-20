@@ -1,13 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { App } from "./components/App";
+import { authenticateGitHub } from "./github/config";
+import { GitHubLoaderImpl } from "./github/loader";
 import "./index.css";
 import registerServiceWorker from "./registerServiceWorker";
 import { Router, RouterContext } from "./routing";
 import { AppState } from "./store/app";
 import "./store/config";
 
-const app = new AppState();
+const app = new AppState(new GitHubLoaderImpl(authenticateGitHub()));
 app.fetchRepos();
 const router = new Router();
 router.listen(path => {
