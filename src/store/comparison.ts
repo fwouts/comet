@@ -37,7 +37,7 @@ export class ComparisonState {
         loaded: result
       });
       this.updateJiraTickets(EMPTY_STATE);
-      await this.fetchJiraTickets();
+      await this.fetchJiraTickets(result.addedCommits);
     } catch (e) {
       this.updateResult(FAILED_STATE);
     }
@@ -48,19 +48,13 @@ export class ComparisonState {
     this.result = result;
   }
 
-  private async fetchJiraTickets() {
+  private async fetchJiraTickets(addedCommits: Commit[]) {
     if (!this.jiraLoader) {
-      return;
-    }
-    if (this.result.status !== "loaded") {
       return;
     }
     try {
       this.updateJiraTickets(LOADING_STATE);
-      const jiraTickets = await loadJiraTickets(
-        this.jiraLoader,
-        this.result.loaded.addedCommits
-      );
+      const jiraTickets = await loadJiraTickets(this.jiraLoader, addedCommits);
       this.updateJiraTickets({
         status: "loaded",
         loaded: jiraTickets
