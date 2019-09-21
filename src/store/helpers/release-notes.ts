@@ -6,7 +6,7 @@ export function generateReleaseNotes(comparison: ComparisonState): string {
   if (comparison.jiraTickets.status !== "loaded") {
     return "Loading...";
   }
-  const tickets = Object.values(comparison.jiraTickets.loaded.jiraTickets);
+  const tickets = Object.values(comparison.jiraTickets.loaded);
   const ticketsByIssueType = tickets.reduce(
     (acc, ticket) => {
       if (!acc[ticket.issueType.name]) {

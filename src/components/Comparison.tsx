@@ -9,9 +9,8 @@ import { ClipLoader } from "react-spinners";
 import styled from "styled-components";
 import { Commit, CompareRefsResult } from "../github/interface";
 import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "../jira/config";
-import { JiraTicket } from "../jira/interface";
+import { JiraTicket, JiraTicketsByKey } from "../jira/interface";
 import { isJiraTicketDone, jiraTicketHasFurtherCommits } from "../jira/status";
-import { JiraTicketsState } from "../store/comparison";
 import { findJiraTicket } from "../store/helpers/find-ticket";
 import { generateReleaseNotes } from "../store/helpers/release-notes";
 import { Loadable } from "../store/loadable";
@@ -269,7 +268,7 @@ export const Comparison: React.FC<{
 
   function renderComparisonList(
     comparison: CompareRefsResult,
-    jiraTickets: Loadable<JiraTicketsState>
+    jiraTickets: Loadable<JiraTicketsByKey>
   ) {
     return (
       <>

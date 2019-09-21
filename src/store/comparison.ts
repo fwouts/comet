@@ -1,12 +1,12 @@
 import { action, observable } from "mobx";
 import { Commit, CompareRefsResult, GitHubLoader } from "../github/interface";
-import { JiraLoader, JiraTicket } from "../jira/interface";
+import { JiraLoader, JiraTicket, JiraTicketsByKey } from "../jira/interface";
 import { extractJiraKey } from "../jira/key";
 import { EMPTY_STATE, FAILED_STATE, Loadable, LOADING_STATE } from "./loadable";
 
 export class ComparisonState {
   @observable result: Loadable<CompareRefsResult> = EMPTY_STATE;
-  @observable jiraTickets: Loadable<JiraTicketsState> = EMPTY_STATE;
+  @observable jiraTickets: Loadable<JiraTicketsByKey> = EMPTY_STATE;
   @observable showReleaseNotes = false;
 
   constructor(
@@ -37,8 +37,7 @@ export class ComparisonState {
         loaded: result
       });
       this.updateJiraTickets(EMPTY_STATE);
-      // Note: We don't await here, because Jira failing isn't a critical issue.
-      this.fetchJiraTickets().catch(console.error);
+      await this.fetchJiraTickets();
     } catch (e) {
       this.updateResult(FAILED_STATE);
     }
@@ -49,7 +48,7 @@ export class ComparisonState {
     this.result = result;
   }
 
-  async fetchJiraTickets() {
+  private async fetchJiraTickets() {
     if (!this.jiraLoader) {
       return;
     }
@@ -64,7 +63,7 @@ export class ComparisonState {
       );
       this.updateJiraTickets({
         status: "loaded",
-        loaded: { jiraTickets }
+        loaded: jiraTickets
       });
     } catch (e) {
       this.updateJiraTickets(FAILED_STATE);
@@ -72,7 +71,7 @@ export class ComparisonState {
   }
 
   @action
-  private updateJiraTickets(jiraTickets: Loadable<JiraTicketsState>) {
+  private updateJiraTickets(jiraTickets: Loadable<JiraTicketsByKey>) {
     this.jiraTickets = jiraTickets;
   }
 }
@@ -86,10 +85,4 @@ async function loadJiraTickets(
     string
   >;
   return jiraLoader.loadTickets(Array.from(uniqueJiraKeys));
-}
-
-export interface JiraTicketsState {
-  jiraTickets: {
-    [jiraKey: string]: JiraTicket;
-  };
 }
