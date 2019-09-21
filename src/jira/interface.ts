@@ -1,6 +1,5 @@
 export interface JiraLoader {
   loadTickets(jiraKeys: string[]): Promise<{ [jiraKey: string]: JiraTicket }>;
-  loadTicket(jiraKey: string): Promise<JiraTicket>;
 }
 
 export interface JiraTicket {

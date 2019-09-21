@@ -3,7 +3,6 @@ import { JiraLoader } from "./interface";
 
 export function mockJiraLoader(): MockableType<JiraLoader> {
   return {
-    loadTickets: jest.fn(),
-    loadTicket: jest.fn()
+    loadTickets: jest.fn()
   };
 }

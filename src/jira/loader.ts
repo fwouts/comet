@@ -27,7 +27,7 @@ export class JiraLoaderImpl implements JiraLoader {
     }, {});
   }
 
-  async loadTicket(jiraKey: string): Promise<JiraTicket> {
+  private async loadTicket(jiraKey: string): Promise<JiraTicket> {
     const headers = {
       Authorization: `Basic ${btoa(
         `${this.config.email}:${this.config.apiToken}`
