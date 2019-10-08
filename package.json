@@ -5,7 +5,7 @@
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^5.11.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.24",
-    "@fortawesome/react-fontawesome": "^0.1.4",
+    "@fortawesome/react-fontawesome": "^0.1.5",
     "@octokit/rest": "^15.11.1",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.1",
