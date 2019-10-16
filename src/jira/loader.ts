@@ -50,12 +50,15 @@ export class JiraLoaderImpl implements JiraLoader {
     );
     const getCommitsData = getCommitsResponse.data as GetCommitsResponse;
     const commits = getCommitsData.detail
+      // Load the list of commits for this Jira ticket in each Git repository.
       .map(d =>
         d.repositories
           .map(r => r.commits)
           .reduce((acc, curr) => acc.concat(curr), [])
       )
+      // Merge the lists of commits into a single list.
       .reduce((acc, curr) => acc.concat(curr), [])
+      // Sort the commits by time.
       .sort((a, b) => {
         return (
           new Date(b.authorTimestamp).getTime() -
