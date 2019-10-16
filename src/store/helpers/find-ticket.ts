@@ -1,24 +1,18 @@
 import assertNever from "assert-never";
-import { Commit } from "../../github/loader";
-import { jiraConfig } from "../../jira/config";
+import { Commit } from "../../github/interface";
+import { JiraTicket, JiraTicketsByKey } from "../../jira/interface";
 import { extractJiraKey } from "../../jira/key";
-import { JiraTicket } from "../../jira/loader";
 import {
   EMPTY_STATE,
   FAILED_STATE,
-  JiraTicketsState,
   Loadable,
   LOADING_STATE
-} from "../state";
+} from "../../store/loadable";
 
 export function findJiraTicket(
   commit: Commit,
-  jiraTicketsState: Loadable<JiraTicketsState>
+  jiraTicketsState: Loadable<JiraTicketsByKey>
 ): Loadable<JiraTicket, { key: string }> | null {
-  const config = jiraConfig();
-  if (!config) {
-    return null;
-  }
   const key = extractJiraKey(commit.commit.message);
   if (!key) {
     return null;
@@ -40,7 +34,7 @@ export function findJiraTicket(
         key
       };
     case "loaded":
-      const ticket = jiraTicketsState.loaded.jiraTickets[key];
+      const ticket = jiraTicketsState.loaded[key];
       if (ticket) {
         return {
           status: "loaded",

@@ -1,17 +1,12 @@
-import { JiraTicket } from "../../jira/loader";
+import { JiraTicket } from "../../jira/interface";
 import { isJiraTicketDone } from "../../jira/status";
-import { ComparisonState } from "../state";
+import { ComparisonState } from "../comparison";
 
 export function generateReleaseNotes(comparison: ComparisonState): string {
-  if (
-    comparison.status !== "loaded" ||
-    comparison.loaded.jiraTickets.status !== "loaded"
-  ) {
+  if (comparison.jiraTickets.status !== "loaded") {
     return "Loading...";
   }
-  const tickets = Object.values(
-    comparison.loaded.jiraTickets.loaded.jiraTickets
-  );
+  const tickets = Object.values(comparison.jiraTickets.loaded);
   const ticketsByIssueType = tickets.reduce(
     (acc, ticket) => {
       if (!acc[ticket.issueType.name]) {

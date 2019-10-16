@@ -1,17 +1,11 @@
 import { faCodeBranch, faTag } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
-import { connect } from "react-redux";
+import { observer } from "mobx-react";
+import React, { useContext } from "react";
 import styled from "styled-components";
-import { Dispatch, navigateToRefAction } from "../store/actions";
-import {
-  CurrentRepoState,
-  EMPTY_STATE,
-  Loadable,
-  LoadedState,
-  RefsState,
-  State
-} from "../store/state";
+import { RouterContext } from "../routing";
+import { LoadedState } from "../store/loadable";
+import { Ref, RepoState } from "../store/repo";
 import Spinner from "./Spinner";
 
 const Container = styled.ul`
@@ -41,65 +35,41 @@ const RefItem = styled.li<{
   }
 `;
 
-class RefList extends React.Component<{
-  currentRepo?: CurrentRepoState;
-  refs: Loadable<RefsState>;
-  selectedRefName?: string;
-  selectRef(currentRepo: CurrentRepoState, refName: string): void;
-}> {
-  public render = () => (
+export const RefList: React.FC<{
+  state: RepoState;
+}> = observer(({ state }) => {
+  const router = useContext(RouterContext);
+
+  return (
     <Container>
-      {this.props.refs.status === "loaded" && this.renderRefs(this.props.refs)}
-      {this.props.refs.status === "loading" && Spinner}
+      {state.refs.status === "loaded" && renderRefs(state.refs)}
+      {state.refs.status === "loading" && Spinner}
     </Container>
   );
 
-  private renderRefs(refs: LoadedState<RefsState>) {
-    return refs.loaded.refs.map(ref => (
+  function renderRefs(refs: LoadedState<Ref[]>) {
+    return refs.loaded.map(ref => (
       <RefItem
         key={ref.name}
-        selected={this.props.selectedRefName === ref.name}
-        onClick={() => this.props.selectRef(this.props.currentRepo!, ref.name)}
+        selected={state.selectedRefName === ref.name}
+        onClick={() => selectRef(ref.name)}
       >
         <FontAwesomeIcon icon={ref.kind === "branch" ? faCodeBranch : faTag} />{" "}
         {ref.name}
       </RefItem>
     ));
   }
-}
 
-const mapStateToProps = (state: State) => ({
-  currentRepo: state.currentRepo,
-  refs: state.currentRepo ? state.currentRepo.refs : EMPTY_STATE,
-  selectedRefName: state.currentRepo
-    ? state.currentRepo.selectedRefName
-    : undefined
-});
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  selectRef: (currentRepo: CurrentRepoState, refName: string) => {
-    if (currentRepo.refs.status !== "loaded") {
+  function selectRef(refName: string) {
+    if (state.refs.status !== "loaded") {
       return;
     }
-    const refIndex = currentRepo.refs.loaded.refs.findIndex(
-      r => r.name === refName
-    );
+    const refs = state.refs.loaded;
+    const refIndex = refs.findIndex(r => r.name === refName);
     const compareToRefName =
-      refIndex === currentRepo.refs.loaded.refs.length - 1
-        ? currentRepo.refs.loaded.refs[refIndex - 1].name
-        : currentRepo.refs.loaded.refs[refIndex + 1].name;
-    return dispatch(
-      navigateToRefAction(
-        currentRepo.owner,
-        currentRepo.repo,
-        refName,
-        compareToRefName
-      )
-    );
+      refIndex === refs.length - 1
+        ? refs[refIndex - 1].name
+        : refs[refIndex + 1].name;
+    return router.navigate(state.owner, state.repo, refName, compareToRefName);
   }
 });
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(RefList);

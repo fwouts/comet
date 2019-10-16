@@ -1,5 +1,5 @@
 # Build the static website.
-FROM node:10-alpine as builder
+FROM node:11-alpine as builder
 RUN apk add gettext
 WORKDIR /comet-build
 COPY package.json yarn.lock ./

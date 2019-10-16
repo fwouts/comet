@@ -1,5 +1,8 @@
-import { Commit } from "../github/loader";
-import { JiraCommit, JiraTicket, SPECIAL_DONE_STATUSES } from "./loader";
+import { Commit } from "../github/interface";
+import { JiraCommit, JiraTicket } from "./interface";
+
+// Jira status names that should be considered as "Done".
+export const SPECIAL_DONE_STATUSES = new Set(["Ready for Deploy"]);
 
 export function isJiraTicketDone(jiraTicket: JiraTicket) {
   return (

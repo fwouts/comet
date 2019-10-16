@@ -1,11 +1,30 @@
-version: 2
+version: 2.1
+defaults: &defaults
+  docker:
+    - image: circleci/node:11-browsers
 jobs:
   build:
-    docker:
-      - image: circleci/node:10.11.0-browsers
+    <<: *defaults
     steps:
       - checkout
       - setup_remote_docker
       - run:
           name: Build Docker image
           command: docker build .
+  test:
+    <<: *defaults
+    steps:
+      - checkout
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+      - run: yarn install
+      - run: yarn test
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }}
+          paths:
+            - node_modules
+workflows:
+  build_and_test:
+    jobs:
+      - build
+      - test

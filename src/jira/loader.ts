@@ -1,98 +1,86 @@
 import axios from "axios";
-import { HELPFUL_JIRA_ERROR_MESSAGE, jiraConfig } from "./config";
+import { JiraConfig } from "./config";
+import {
+  JiraCommit,
+  JiraLoader,
+  JiraTicket,
+  JiraTicketsByKey
+} from "./interface";
 
-// Jira status names that should be considered as "Done".
-export const SPECIAL_DONE_STATUSES = new Set(["Ready for Deploy"]);
+export class JiraLoaderImpl implements JiraLoader {
+  constructor(private readonly config: JiraConfig) {}
 
-export interface JiraTicket {
-  id: string;
-  key: string;
-  summary: string;
-  issueType: {
-    name: string;
-    iconUrl: string;
-  };
-  status: {
-    name: string;
-    categoryKey: string;
-    categoryColor: string;
-  };
-  commits: JiraCommit[];
-}
-
-export async function loadTickets(
-  jiraKeys: string[]
-): Promise<{ [jiraKey: string]: JiraTicket }> {
-  // Note: We ignore errors to prevent one invalid key from failing the entire fetch.
-  const allTickets = await Promise.all(
-    jiraKeys.map(jiraKey =>
-      loadTicket(jiraKey).catch(e => {
-        console.warn(e);
-        return null;
-      })
-    )
-  );
-  return allTickets.reduce<{
-    [jiraKey: string]: JiraTicket;
-  }>((acc, ticket, index) => {
-    if (ticket) {
-      acc[jiraKeys[index]] = ticket;
-    }
-    return acc;
-  }, {});
-}
-
-export async function loadTicket(jiraKey: string): Promise<JiraTicket> {
-  const config = jiraConfig();
-  if (!config) {
-    throw new Error(HELPFUL_JIRA_ERROR_MESSAGE);
+  async loadTickets(jiraKeys: string[]): Promise<JiraTicketsByKey> {
+    // Note: We ignore errors to prevent one invalid key from failing the entire fetch.
+    const allTickets = await Promise.all(
+      jiraKeys.map(jiraKey =>
+        this.loadTicket(jiraKey).catch(e => {
+          console.warn(e);
+          return null;
+        })
+      )
+    );
+    return allTickets.reduce<JiraTicketsByKey>((acc, ticket, index) => {
+      if (ticket) {
+        acc[jiraKeys[index]] = ticket;
+      }
+      return acc;
+    }, {});
   }
-  const headers = {
-    Authorization: `Basic ${btoa(`${config.email}:${config.apiToken}`)}`
-  };
-  const getIssueResponse = await axios.get(
-    `/jira/rest/api/3/issue/${jiraKey}`,
-    {
-      headers
-    }
-  );
-  const getIssueData = getIssueResponse.data as GetIssueResponse;
-  const issueId = getIssueResponse.data.id;
-  const getCommitsResponse = await axios.get(
-    `/jira/rest/dev-status/1.0/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=repository`,
-    {
-      headers
-    }
-  );
-  const getCommitsData = getCommitsResponse.data as GetCommitsResponse;
-  const commits = getCommitsData.detail
-    .map(d =>
-      d.repositories
-        .map(r => r.commits)
-        .reduce((acc, curr) => acc.concat(curr), [])
-    )
-    .reduce((acc, curr) => acc.concat(curr), [])
-    .sort((a, b) => {
-      return (
-        new Date(b.authorTimestamp).getTime() -
-        new Date(a.authorTimestamp).getTime()
-      );
-    });
-  return {
-    id: issueId,
-    key: jiraKey,
-    issueType: {
-      name: getIssueData.fields.issuetype.name,
-      iconUrl: getIssueData.fields.issuetype.iconUrl
-    },
-    summary: getIssueData.fields.summary,
-    status: {
-      name: getIssueData.fields.status.name,
-      categoryKey: getIssueData.fields.status.statusCategory.key,
-      categoryColor: getIssueData.fields.status.statusCategory.colorName
-    },
-    commits
-  };
+
+  private async loadTicket(jiraKey: string): Promise<JiraTicket> {
+    const headers = {
+      Authorization: `Basic ${btoa(
+        `${this.config.email}:${this.config.apiToken}`
+      )}`
+    };
+    const getIssueResponse = await axios.get(
+      `/jira/rest/api/3/issue/${jiraKey}`,
+      {
+        headers
+      }
+    );
+    const getIssueData = getIssueResponse.data as GetIssueResponse;
+    const issueId = getIssueResponse.data.id;
+    const getCommitsResponse = await axios.get(
+      `/jira/rest/dev-status/1.0/issue/detail?issueId=${issueId}&applicationType=GitHub&dataType=repository`,
+      {
+        headers
+      }
+    );
+    const getCommitsData = getCommitsResponse.data as GetCommitsResponse;
+    const commits = getCommitsData.detail
+      // Load the list of commits for this Jira ticket in each Git repository.
+      .map(d =>
+        d.repositories
+          .map(r => r.commits)
+          .reduce((acc, curr) => acc.concat(curr), [])
+      )
+      // Merge the lists of commits into a single list.
+      .reduce((acc, curr) => acc.concat(curr), [])
+      // Sort the commits by time.
+      .sort((a, b) => {
+        return (
+          new Date(b.authorTimestamp).getTime() -
+          new Date(a.authorTimestamp).getTime()
+        );
+      });
+    return {
+      id: issueId,
+      key: jiraKey,
+      issueType: {
+        name: getIssueData.fields.issuetype.name,
+        iconUrl: getIssueData.fields.issuetype.iconUrl
+      },
+      summary: getIssueData.fields.summary,
+      status: {
+        name: getIssueData.fields.status.name,
+        categoryKey: getIssueData.fields.status.statusCategory.key,
+        categoryColor: getIssueData.fields.status.statusCategory.colorName
+      },
+      commits
+    };
+  }
 }
 
 export interface GetIssueResponse {
@@ -124,10 +112,4 @@ export interface GetCommitsResponse {
       commits: JiraCommit[];
     }>;
   }>;
-}
-
-export interface JiraCommit {
-  id: string;
-  authorTimestamp: string;
-  message: string;
 }

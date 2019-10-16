@@ -1,64 +1,46 @@
-import React from "react";
-import { connect } from "react-redux";
+import { observer } from "mobx-react";
+import React, { useContext } from "react";
 import Select from "react-select";
 import styled from "styled-components";
-import { Dispatch, navigateToRepoAction } from "../store/actions";
-import { Loadable, ReposState, State } from "../store/state";
+import { RouterContext } from "../routing";
+import { AppState } from "../store/app";
 import Spinner from "./Spinner";
 
 const Container = styled.div`
   padding: 8px;
 `;
 
-class RepoPicker extends React.Component<{
-  repos: Loadable<ReposState>;
-  currentRepo?: string;
-  navigateToRepo(repo: string): void;
-}> {
-  public render() {
-    if (this.props.repos.status !== "loaded") {
-      return Spinner;
-    }
-    const options = this.props.repos.loaded.suggested.map(r => ({
-      value: `${r.owner}/${r.repo}`,
-      label: `${r.owner}/${r.repo}`
-    }));
-    const selectedOption = options.find(
-      option => option.value === this.props.currentRepo
-    );
-    return (
-      <Container>
-        <Select
-          placeholder="Select a GitHub repo"
-          options={options}
-          isOptionSelected={option => option.value === this.props.currentRepo}
-          onChange={(option: any) =>
-            option &&
-            !(option instanceof Array) &&
-            this.props.navigateToRepo(option.value)
-          }
-          value={selectedOption}
-        />
-      </Container>
-    );
+export const RepoPicker: React.FC<{
+  state: AppState;
+}> = observer(({ state }) => {
+  const router = useContext(RouterContext);
+  if (state.suggestedRepositories.status !== "loaded") {
+    return Spinner;
   }
-}
-
-const mapStateToProps = (state: State) => ({
-  repos: state.repos,
-  currentRepo: state.currentRepo
+  const suggested = state.suggestedRepositories.loaded;
+  const options = suggested.map(r => ({
+    value: `${r.owner}/${r.repo}`,
+    label: `${r.owner}/${r.repo}`
+  }));
+  const currentRepo = state.currentRepo
     ? `${state.currentRepo.owner}/${state.currentRepo.repo}`
-    : undefined
+    : undefined;
+  const selectedOption = options.find(option => option.value === currentRepo);
+  return (
+    <Container>
+      <Select
+        placeholder="Select a GitHub repo"
+        options={options}
+        isOptionSelected={option => option.value === currentRepo}
+        onChange={(option: any) => {
+          if (!option || option instanceof Array) {
+            return;
+          }
+          const [owner, repo] = option.value.split("/", 2);
+          router.navigate(owner, repo);
+        }}
+        value={selectedOption}
+      />
+    </Container>
+  );
 });
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  navigateToRepo: (fullRepo: string) => {
-    const [owner, repo] = fullRepo.split("/", 2);
-    dispatch(navigateToRepoAction(owner, repo));
-  }
-});
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(RepoPicker);
