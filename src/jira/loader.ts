@@ -1,13 +1,16 @@
 import axios from "axios";
 import { JiraConfig } from "./config";
-import { JiraCommit, JiraLoader, JiraTicket } from "./interface";
+import {
+  JiraCommit,
+  JiraLoader,
+  JiraTicket,
+  JiraTicketsByKey
+} from "./interface";
 
 export class JiraLoaderImpl implements JiraLoader {
   constructor(private readonly config: JiraConfig) {}
 
-  async loadTickets(
-    jiraKeys: string[]
-  ): Promise<{ [jiraKey: string]: JiraTicket }> {
+  async loadTickets(jiraKeys: string[]): Promise<JiraTicketsByKey> {
     // Note: We ignore errors to prevent one invalid key from failing the entire fetch.
     const allTickets = await Promise.all(
       jiraKeys.map(jiraKey =>
@@ -17,9 +20,7 @@ export class JiraLoaderImpl implements JiraLoader {
         })
       )
     );
-    return allTickets.reduce<{
-      [jiraKey: string]: JiraTicket;
-    }>((acc, ticket, index) => {
+    return allTickets.reduce<JiraTicketsByKey>((acc, ticket, index) => {
       if (ticket) {
         acc[jiraKeys[index]] = ticket;
       }
