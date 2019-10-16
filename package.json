@@ -3,8 +3,8 @@
   "version": "0.5",
   "license": "MIT",
   "dependencies": {
-    "@fortawesome/free-solid-svg-icons": "^5.11.2",
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
+    "@fortawesome/free-solid-svg-icons": "^5.11.2",
     "@fortawesome/react-fontawesome": "^0.1.6",
     "@octokit/rest": "^15.11.1",
     "@types/cors": "^2.8.6",
@@ -12,7 +12,6 @@
     "@types/history": "^4.7.3",
     "@types/lodash": "^4.14.144",
     "@types/react-modal": "^3.8.3",
-    "@types/react-router": "^5.1.2",
     "@types/react-select": "^3.0.5",
     "@types/request": "^2.48.3",
     "@types/styled-components": "^4.1.19",
@@ -29,7 +28,6 @@
     "react-dom": "^16.10.2",
     "react-fontawesome": "^1.6.1",
     "react-modal": "^3.10.1",
-    "react-router": "^4.3.1",
     "react-select": "^3.0.8",
     "react-spinners": "^0.6.1",
     "styled-components": "^4.4.0"
