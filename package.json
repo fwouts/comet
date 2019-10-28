@@ -12,7 +12,7 @@
     "@types/history": "^4.7.3",
     "@types/lodash": "^4.14.144",
     "@types/react-modal": "^3.10.0",
-    "@types/react-select": "^3.0.5",
+    "@types/react-select": "^3.0.6",
     "@types/request": "^2.48.3",
     "@types/styled-components": "^4.1.20",
     "assert-never": "^1.2.0",
