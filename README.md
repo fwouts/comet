@@ -1,3 +1,5 @@
+!! This tool is no longer used & maintained by Airtasker
+
 # Comet
 
 [![Build](https://img.shields.io/circleci/project/github/airtasker/comet.svg)](https://circleci.com/gh/airtasker/comet)
